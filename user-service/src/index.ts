@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import { supabase } from "./lib/supabase";
+import authRoutes from "./routes/auth.route";
 
 const app = express();
 const PORT = process.env.PORT || 3002;
@@ -26,6 +27,8 @@ app.get("/health", async (req, res) => {
     database: "connected ✅",
   });
 });
+
+app.use("/auth", authRoutes);
 
 app.listen(PORT, () => {
   console.log(`✅ user-service berjalan di port ${PORT}`);
