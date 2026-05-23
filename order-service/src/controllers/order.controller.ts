@@ -7,6 +7,66 @@ type OrderItem = {
   jumlah: number;
 };
 
+// ─── ADMIN ──────────────────────────
+export async function getAllOrders(req: Request, res: Response) {
+  try {
+    const { page = "1", limit = "10" } = req.query;
+    const pageNumber = parseInt(page as string);
+    const limitNumber = parseInt(limit as string);
+    const from = (pageNumber - 1) * limitNumber;
+    const to = from + limitNumber - 1;
+
+    const { data, error, count } = await supabase
+      .from("orders")
+      .select("*", { count: "exact" })
+      .order("created_at", { ascending: false })
+      .range(from, to);
+
+    if (error) throw error;
+
+    res.json({
+      data,
+      meta: {
+        total_items: count,
+        current_page: pageNumber,
+        total_pages: count ? Math.ceil(count / limitNumber) : 0,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Gagal mengambil data pesanan" });
+  }
+}
+
+export async function updateOrderStatus(req: Request, res: Response) {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    const validStatuses = ["new", "confirmed", "completed", "cancelled"];
+    if (!validStatuses.includes(status)) {
+      res.status(400).json({ error: "Status tidak valid" });
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from("orders")
+      .update({ status })
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    if (!data) {
+      res.status(404).json({ error: "Order tidak ditemukan" });
+      return;
+    }
+
+    res.json({ data, message: "Status pesanan berhasil diperbarui" });
+  } catch (error) {
+    res.status(500).json({ error: "Gagal memperbarui status" });
+  }
+}
+
 // ─────────────────────────────────────────────────────────
 // POST /orders
 // Buat order baru (Guest Checkout & Logged In User)
@@ -136,6 +196,29 @@ export async function createOrder(req: Request, res: Response) {
     res.status(201).json({ data: order, message: "Pesanan berhasil dibuat!" });
   } catch (error) {
     res.status(500).json({ error: "Gagal membuat order sistem" });
+  }
+}
+
+// ─── CUSTOMER: Cek order via nomor WA ───────────────────────────────────────
+export async function getOrdersByWa(req: Request, res: Response) {
+  try {
+    const { no_wa } = req.query;
+    if (!no_wa || typeof no_wa !== "string") {
+      res.status(400).json({ error: "Parameter no_wa wajib diisi" });
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from("orders")
+      .select("id, status, total, items, created_at, nama_pembeli") // Filter kolom sensitif
+      .eq("no_wa", no_wa)
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+
+    res.json({ data });
+  } catch (error) {
+    res.status(500).json({ error: "Gagal mengambil riwayat pesanan" });
   }
 }
 
