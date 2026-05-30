@@ -1,5 +1,21 @@
+import multer from "multer";
 import { Request, Response } from "express";
-import { supabase } from "../../../user-service/src/lib/supabase";
+import { supabase } from "../lib/supabase";
+
+const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
+// Konfigurasi Multer
+export const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 2 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    if (ALLOWED_MIME_TYPES.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Format file tidak didukung. Gunakan JPG, PNG, atau WebP"));
+    }
+  },
+});
 
 // ─────────────────────────────────────────────────────────
 // GET /products
@@ -125,6 +141,53 @@ export async function createProduct(req: Request, res: Response) {
   }
 }
 
+export async function uploadFotoProduk(req: Request, res: Response) {
+  try {
+    if (!req.file) {
+      res.status(400).json({ error: "File foto tidak ditemukan" });
+      return;
+    }
+
+    // Pemetaan Ekstensi yang Aman (Anti Bom Waktu)
+    const mimeToExt: Record<string, string> = {
+      "image/jpeg": "jpg",
+      "image/png": "png",
+      "image/webp": "webp",
+    };
+    const fileExt = mimeToExt[req.file.mimetype] || "jpg";
+
+    // Nama file unik
+    const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
+
+    // Upload ke Supabase Storage
+    const { error } = await supabase.storage
+      .from("product-images")
+      .upload(fileName, req.file.buffer, {
+        contentType: req.file.mimetype,
+        upsert: false,
+      });
+
+    if (error) throw error;
+
+    // Ambil public URL
+    const { data: urlData } = supabase.storage
+      .from("product-images")
+      .getPublicUrl(fileName);
+
+    // Kembalikan URL dan fileName (Standar API)
+    res.status(201).json({
+      data: {
+        url: urlData.publicUrl,
+        fileName: fileName,
+      },
+      message: "Foto berhasil diunggah",
+    });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "Gagal mengunggah foto ke Supabase Storage" });
+  }
+}
 // ─────────────────────────────────────────────────────────
 // PATCH /products/:id (Admin Only)
 // ─────────────────────────────────────────────────────────

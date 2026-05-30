@@ -1,0 +1,25 @@
+# Node / Bun
+node_modules/
+bun.lock
+*.log
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Build output
+dist/
+build/
+*.tsbuildinfo
+
+# OS generated
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Supabase local (jika ada)
+supabase/.temp/

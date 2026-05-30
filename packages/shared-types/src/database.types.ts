@@ -105,12 +105,43 @@ export type Database = {
           },
         ]
       }
+      product_images: {
+        Row: {
+          created_at: string | null
+          display_order: number
+          id: string
+          image_url: string
+          product_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          display_order?: number
+          id?: string
+          image_url: string
+          product_id: string
+        }
+        Update: {
+          created_at?: string | null
+          display_order?: number
+          id?: string
+          image_url?: string
+          product_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_images_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           catatan_musim: string | null
           created_at: string
           deskripsi: string | null
-          foto_url: string | null
           harga: number
           id: string
           kategori: string
@@ -125,7 +156,6 @@ export type Database = {
           catatan_musim?: string | null
           created_at?: string
           deskripsi?: string | null
-          foto_url?: string | null
           harga: number
           id?: string
           kategori: string
@@ -140,7 +170,6 @@ export type Database = {
           catatan_musim?: string | null
           created_at?: string
           deskripsi?: string | null
-          foto_url?: string | null
           harga?: number
           id?: string
           kategori?: string

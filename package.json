@@ -1,0 +1,11 @@
+{
+  "name": "jalaku",
+  "private": true,
+  "workspaces": [
+    "booking-service",
+    "order-service",
+    "product-service",
+    "user-service",
+    "packages/*"
+  ]
+}

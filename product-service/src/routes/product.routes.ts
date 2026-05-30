@@ -3,8 +3,10 @@ import {
   getAllProducts,
   getProductBySlug,
   createProduct,
+  uploadFotoProduk,
   updateProduct,
   deleteProduct,
+  upload,
 } from "../controllers/product.controller";
 import { requireAdmin } from "../middleware/auth.middleware";
 
@@ -16,6 +18,12 @@ router.get("/:slug", getProductBySlug);
 
 // ─── ADMIN ONLY ROUTES ─────────────────────────────────
 router.post("/", requireAdmin, createProduct);
+router.post(
+  "/upload-foto",
+  requireAdmin,
+  upload.single("foto"),
+  uploadFotoProduk,
+);
 router.patch("/:id", requireAdmin, updateProduct);
 router.delete("/:id", requireAdmin, deleteProduct);
 
