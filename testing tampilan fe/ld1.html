@@ -1,0 +1,1057 @@
+<!doctype html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Jalaku - Langsung dari Kebun Keluarga, ke Meja Makanmu</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&amp;family=Lora:wght@600;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#2D5016", // Green
+              sage: "#A8C5A0",
+              "amber-accent": "#D4A853",
+              "beige-bg": "#F5F0E8",
+              "on-surface": "#1b1c19",
+              surface: "#faf9f5",
+              background: "#faf9f5",
+            },
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "0.5rem",
+              xl: "0.75rem",
+              "2xl": "1rem",
+              full: "9999px",
+            },
+            spacing: {
+              lg: "24px",
+              xs: "4px",
+              md: "16px",
+              base: "8px",
+              xl: "32px",
+              sm: "8px",
+              "2xl": "48px",
+              "3xl": "64px",
+            },
+            fontFamily: {
+              headline: ["Lora", "serif"],
+              body: ["Montserrat", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
+      }
+      .material-symbols-outlined.fill {
+        font-variation-settings: "FILL" 1;
+      }
+      .animate-fade-up {
+        opacity: 0;
+        transform: translateY(20px);
+        animation: fadeUp 0.6s ease-out forwards;
+      }
+      @keyframes fadeUp {
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .pulse-wa {
+        animation: pulse 2s infinite;
+      }
+      @keyframes pulse {
+        0% {
+          box-shadow: 0 0 0 0 rgba(45, 80, 22, 0.4);
+        }
+        70% {
+          box-shadow: 0 0 0 15px rgba(45, 80, 22, 0);
+        }
+        100% {
+          box-shadow: 0 0 0 0 rgba(45, 80, 22, 0);
+        }
+      }
+    </style>
+  </head>
+  <body
+    class="bg-background text-on-background font-body antialiased overflow-x-hidden"
+  >
+    <!-- 1. Sticky Navbar Component -->
+    <nav
+      class="bg-surface/80 backdrop-blur-md border-b border-sage/20 top-0 fixed w-full z-50 transition-all duration-300"
+      id="navbar"
+    >
+      <div
+        class="flex justify-between items-center px-lg py-md max-w-7xl mx-auto w-full"
+      >
+        <a
+          class="font-headline text-2xl font-bold text-primary flex items-center gap-2"
+          href="#"
+        >
+          <span class="material-symbols-outlined fill text-sage"
+            >potted_plant</span
+          >
+          Jalaku
+        </a>
+        <div class="hidden md:flex gap-lg items-center">
+          <a
+            class="text-on-surface/80 font-medium hover:text-primary transition-colors duration-200"
+            href="#"
+            >Katalog</a
+          >
+          <a
+            class="text-on-surface/80 font-medium hover:text-primary transition-colors duration-200"
+            href="#"
+            >Cek Status</a
+          >
+          <a
+            class="text-on-surface/80 font-medium hover:text-primary transition-colors duration-200"
+            href="#"
+            >Tentang Kami</a
+          >
+        </div>
+        <div class="flex items-center gap-md">
+          <div
+            class="hidden md:flex items-center gap-4 pr-4 border-r border-sage/30"
+          >
+            <button
+              class="text-on-surface/80 hover:text-primary transition-colors relative"
+            >
+              <span class="material-symbols-outlined">notifications</span>
+              <span
+                class="absolute top-0 right-0 w-2.5 h-2.5 bg-amber-accent rounded-full border-2 border-surface"
+              ></span>
+            </button>
+            <button
+              class="text-on-surface/80 hover:text-primary transition-colors relative"
+            >
+              <span class="material-symbols-outlined">shopping_cart</span>
+              <span
+                class="absolute -top-1.5 -right-2 bg-amber-accent text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+                >3</span
+              >
+            </button>
+          </div>
+          <div
+            class="hidden md:flex items-center gap-2 cursor-pointer group relative"
+          >
+            <div
+              class="w-8 h-8 rounded-full bg-sage/30 overflow-hidden ring-2 ring-transparent group-hover:ring-primary transition-all"
+            >
+              <img
+                alt="User"
+                class="w-full h-full object-cover"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCcuLiUv3bHvALGQjdCx1uF76dmcS_EQpo18i4YjHM3dL7akLAzCzKSc47bzKmKc_jnsJHHeU7vezF12huPEi7_pDT7AY9U7d54O2xdLgQtKFGeFYF8T1S7H4pJHFiVJDQqKu9tMhwptwvzXGNbY-Wn4OT1obmT0_RVxG9seyFZFsbLRSfw8wuVwNe_eBOOtdc3rjfTJu6KZg2wfgr_yIfpBtyrF5pfcOY9LJqn6oD6qdFWMRSSbuNTxQBG5hdYY4mnEbVPk_J_T8WI"
+              />
+            </div>
+            <span
+              class="material-symbols-outlined text-sm text-on-surface/60 group-hover:text-primary transition-colors"
+              >expand_more</span
+            >
+            <!-- Dropdown Menu -->
+            <div
+              class="absolute top-full right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-sage/10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top-right z-50"
+            >
+              <div class="py-2">
+                <a
+                  class="block px-4 py-2 text-sm text-on-surface/80 hover:bg-sage/10 hover:text-primary transition-colors"
+                  href="#"
+                  >Pesanan Saya</a
+                >
+                <a
+                  class="block px-4 py-2 text-sm text-on-surface/80 hover:bg-sage/10 hover:text-primary transition-colors"
+                  href="#"
+                  >Alamat</a
+                >
+                <div class="border-t border-sage/10 my-1"></div>
+                <a
+                  class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                  href="#"
+                  >Keluar</a
+                >
+              </div>
+            </div>
+          </div>
+          <button class="md:hidden text-primary">
+            <span class="material-symbols-outlined">menu</span>
+          </button>
+        </div>
+      </div>
+    </nav>
+    <!-- 2. Hero Section -->
+    <section
+      class="max-w-7xl mx-auto px-lg pt-3xl pb-2xl md:py-3xl mt-16 flex flex-col md:flex-row items-center gap-2xl"
+    >
+      <div class="flex-1 space-y-xl animate-fade-up">
+        <div class="space-y-4">
+          <span
+            class="text-amber-accent font-bold tracking-wider text-sm uppercase"
+            >Pilihan Terbaik Nusantara</span
+          >
+          <h1
+            class="font-headline text-5xl md:text-6xl lg:text-7xl text-primary leading-[1.1] font-bold"
+          >
+            Dari Kebun Keluarga,<br />
+            <span class="text-sage italic">ke Meja Makanmu.</span>
+          </h1>
+        </div>
+        <p class="text-lg text-on-surface/70 max-w-lg leading-relaxed">
+          Nikmati kesegaran hasil bumi asli Indonesia, dipanen dengan penuh
+          cinta oleh keluarga petani lokal, dan diantar langsung ke rumah Anda.
+        </p>
+        <div class="flex flex-wrap gap-md pt-4">
+          <button
+            class="bg-primary text-white font-bold px-8 py-4 rounded-xl hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 text-lg"
+          >
+            Lihat Katalog
+          </button>
+          <button
+            class="border-2 border-sage text-primary font-bold px-8 py-4 rounded-xl hover:bg-sage/10 transition-all text-lg flex items-center gap-2"
+          >
+            <span class="material-symbols-outlined text-xl">play_circle</span>
+            Cara Order
+          </button>
+        </div>
+      </div>
+      <div class="flex-1 w-full animate-fade-up hidden md:block">
+        <div
+          class="rounded-[2rem] overflow-hidden aspect-[4/3] shadow-2xl relative border-8 border-white"
+        >
+          <div
+            class="absolute inset-0 bg-gradient-to-tr from-primary/20 to-transparent z-10 mix-blend-overlay"
+          ></div>
+          <img
+            alt="Fresh harvest"
+            class="object-cover w-full h-full"
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuB372sCkV7qwG5uXmlfSHSX-N8RgTwfKoJE3ZjjmjOQELfrH6XnuQ-NnlEtK3OsEVfkkTdMYaZX5u686Pzje-8i78yrpFmnE-PEuDCdxn3H3ooxFQgMoAjIpReK3BIOhKl2gZmb4fJGiFjvLfTLiiVNzzv0r6Lzvqo3jQ7ZjvbQ2VXSu6KHOb4g64Eyn-nuW13vekOhDSWDi8UwUJpko5Bc2uS7NLVPui54OOfPOyUAotV3FJdnGaBiVBElEvud5u4Jxx2depLKcafV"
+          />
+        </div>
+      </div>
+    </section>
+    <!-- 3. Value Pillars Section -->
+    <section class="bg-beige-bg py-2xl">
+      <div class="max-w-7xl mx-auto px-lg">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-lg">
+          <div
+            class="bg-white p-xl rounded-2xl shadow-sm hover:shadow-md transition-shadow flex flex-col items-center text-center space-y-md"
+          >
+            <div
+              class="w-16 h-16 bg-sage/20 rounded-full flex items-center justify-center text-primary mb-2"
+            >
+              <span class="material-symbols-outlined text-3xl">eco</span>
+            </div>
+            <h3 class="font-headline text-xl text-primary font-bold">
+              Langsung dari Kebun
+            </h3>
+            <p class="text-on-surface/70 leading-relaxed">
+              Produk segar yang baru dipanen untuk menjamin kualitas terbaik.
+            </p>
+          </div>
+          <div
+            class="bg-white p-xl rounded-2xl shadow-sm hover:shadow-md transition-shadow flex flex-col items-center text-center space-y-md"
+          >
+            <div
+              class="w-16 h-16 bg-sage/20 rounded-full flex items-center justify-center text-primary mb-2"
+            >
+              <span class="material-symbols-outlined text-3xl">payments</span>
+            </div>
+            <h3 class="font-headline text-xl text-primary font-bold">
+              Harga Langsung Petani
+            </h3>
+            <p class="text-on-surface/70 leading-relaxed">
+              Tanpa perantara, harga lebih adil untuk Anda dan petani kami.
+            </p>
+          </div>
+          <div
+            class="bg-white p-xl rounded-2xl shadow-sm hover:shadow-md transition-shadow flex flex-col items-center text-center space-y-md"
+          >
+            <div
+              class="w-16 h-16 bg-sage/20 rounded-full flex items-center justify-center text-primary mb-2"
+            >
+              <span class="material-symbols-outlined text-3xl"
+                >family_restroom</span
+              >
+            </div>
+            <h3 class="font-headline text-xl text-primary font-bold">
+              Dikelola Keluarga Kami
+            </h3>
+            <p class="text-on-surface/70 leading-relaxed">
+              Setiap produk ditangani dengan nilai kekeluargaan dan kejujuran.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- 4. Product Categories -->
+    <section class="py-2xl max-w-7xl mx-auto px-lg">
+      <h2
+        class="font-headline text-3xl text-primary mb-xl text-center font-bold"
+      >
+        Kategori Pilihan
+      </h2>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-lg">
+        <div
+          class="bg-white p-xl rounded-2xl shadow-sm border border-sage/20 text-center hover:-translate-y-1 hover:shadow-md transition-all cursor-pointer group flex flex-col items-center relative overflow-hidden"
+        >
+          <div
+            class="absolute top-0 inset-x-0 h-1 bg-sage/50 group-hover:bg-sage transition-colors"
+          ></div>
+          <div
+            class="w-16 h-16 bg-sage/10 rounded-full flex items-center justify-center mb-md group-hover:bg-sage/20 transition-colors"
+          >
+            <span class="material-symbols-outlined text-3xl text-primary"
+              >grass</span
+            >
+          </div>
+          <p class="font-bold text-primary text-lg">Beras</p>
+        </div>
+        <div
+          class="bg-white p-xl rounded-2xl shadow-sm border border-sage/20 text-center hover:-translate-y-1 hover:shadow-md transition-all cursor-pointer group flex flex-col items-center relative overflow-hidden"
+        >
+          <div
+            class="absolute top-0 inset-x-0 h-1 bg-sage/50 group-hover:bg-sage transition-colors"
+          ></div>
+          <div
+            class="w-16 h-16 bg-sage/10 rounded-full flex items-center justify-center mb-md group-hover:bg-sage/20 transition-colors"
+          >
+            <span class="material-symbols-outlined text-3xl text-primary"
+              >coffee_maker</span
+            >
+          </div>
+          <p class="font-bold text-primary text-lg">Kopi</p>
+        </div>
+        <div
+          class="bg-white p-xl rounded-2xl shadow-sm border border-sage/20 text-center hover:-translate-y-1 hover:shadow-md transition-all cursor-pointer group flex flex-col items-center relative overflow-hidden"
+        >
+          <div
+            class="absolute top-0 inset-x-0 h-1 bg-sage/50 group-hover:bg-sage transition-colors"
+          ></div>
+          <div
+            class="w-16 h-16 bg-sage/10 rounded-full flex items-center justify-center mb-md group-hover:bg-sage/20 transition-colors"
+          >
+            <span class="material-symbols-outlined text-3xl text-primary"
+              >nutrition</span
+            >
+          </div>
+          <p class="font-bold text-primary text-lg">Buah &amp; Sayur</p>
+        </div>
+        <div
+          class="bg-white p-xl rounded-2xl shadow-sm border border-sage/20 text-center hover:-translate-y-1 hover:shadow-md transition-all cursor-pointer group flex flex-col items-center relative overflow-hidden"
+        >
+          <div
+            class="absolute top-0 inset-x-0 h-1 bg-sage/50 group-hover:bg-sage transition-colors"
+          ></div>
+          <div
+            class="w-16 h-16 bg-sage/10 rounded-full flex items-center justify-center mb-md group-hover:bg-sage/20 transition-colors"
+          >
+            <span class="material-symbols-outlined text-3xl text-primary"
+              >soup_kitchen</span
+            >
+          </div>
+          <p class="font-bold text-primary text-lg">Olahan Dapur</p>
+        </div>
+      </div>
+    </section>
+    <!-- 5. Featured Products -->
+    <section class="py-2xl bg-surface">
+      <div class="max-w-7xl mx-auto px-lg">
+        <div
+          class="flex justify-between items-end mb-xl border-b border-sage/20 pb-4"
+        >
+          <h2 class="font-headline text-3xl text-primary font-bold">
+            Produk Unggulan
+          </h2>
+          <a
+            class="text-primary font-bold hover:text-primary/80 transition-colors flex items-center gap-1"
+            href="#"
+            >Lihat Semua
+            <span class="material-symbols-outlined text-sm"
+              >arrow_forward</span
+            ></a
+          >
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-lg">
+          <!-- Product Card 1 -->
+          <div
+            class="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 group border border-sage/10 flex flex-col h-full"
+          >
+            <div class="relative aspect-[4/3] overflow-hidden bg-slate-50">
+              <span
+                class="absolute top-md left-md bg-primary text-white text-xs px-3 py-1.5 rounded-full font-bold z-10 shadow-sm flex items-center gap-1"
+              >
+                <span class="material-symbols-outlined text-[14px]"
+                  >check_circle</span
+                >
+                Tersedia
+              </span>
+              <img
+                alt="Beras Organik"
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBEUucOvZPdKW5yFuhHi1itlPKHTsLx9K2QbfRVBKUnMGVyZrd6V7wcvg8jer9GHPCSRNI_nTYq13yX4y3MzECi_bGEbycXdoR5csZ-2Yin0YWIM1Rl8pSTGUPvplWsb-ftd6cUB20dpjRprzBsylQ0sApesBOuodADqi3lvSDsjsKxIJNQSaYq22aP2k2c1PUSeZMdSJgZegwLPEdXzHigo3Df1ND3MwJilxS5AiFEYs3PHVjYDcv-aPke_LmoUasE3BtiOoB347nV"
+              />
+            </div>
+            <div class="p-lg flex flex-col flex-1 justify-between gap-md">
+              <div>
+                <p
+                  class="text-xs text-sage font-bold uppercase tracking-widest mb-1"
+                >
+                  Beras
+                </p>
+                <h3
+                  class="font-headline text-lg text-primary font-bold leading-tight mb-2"
+                >
+                  Beras Merah Cianjur
+                </h3>
+                <p class="text-sm text-on-surface/60 flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[16px]"
+                    >scale</span
+                  >
+                  Per 5 Kg
+                </p>
+              </div>
+              <div
+                class="flex justify-between items-center pt-md border-t border-sage/10 mt-auto"
+              >
+                <p class="text-amber-accent font-bold text-xl">Rp 85.000</p>
+                <button
+                  class="bg-sage/20 text-primary hover:bg-sage/40 font-bold px-4 py-2 rounded-xl text-sm transition-colors flex items-center gap-1"
+                >
+                  Pesan
+                </button>
+              </div>
+            </div>
+          </div>
+          <!-- Product Card 2 -->
+          <div
+            class="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 group border border-sage/10 flex flex-col h-full"
+          >
+            <div class="relative aspect-[4/3] overflow-hidden bg-slate-50">
+              <span
+                class="absolute top-md left-md bg-amber-accent text-white text-xs px-3 py-1.5 rounded-full font-bold z-10 shadow-sm flex items-center gap-1"
+              >
+                <span class="material-symbols-outlined text-[14px]"
+                  >schedule</span
+                >
+                Pre-Order
+              </span>
+              <img
+                alt="Kopi Arabika"
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBtar-MXAOfvdwcHe0iVlVMrJAg7sn-Es0p1erWzOAbqk1tVW220ppZZxZf8SQwWLJf9HwjXz3y6uo5mh-b_egkeoXSjpLj6Ar-KTA-DBrYmAdGtDlKS2oZM74N6n4zGmoMXFjRAU-s73NItzpMCzYoAOiU4GP7RuwwidsozkKpeRv7nUYd9Q-0lwFKKkPiwZML_ETfU_b6YrK9jrw8tc-Zn_Z1LvMSPYwLY5ApiVAsiV1lNr0HY9jPkQVJhTQn16aBvMW7RNY9-pbS"
+              />
+            </div>
+            <div class="p-lg flex flex-col flex-1 justify-between gap-md">
+              <div>
+                <p
+                  class="text-xs text-sage font-bold uppercase tracking-widest mb-1"
+                >
+                  Kopi
+                </p>
+                <h3
+                  class="font-headline text-lg text-primary font-bold leading-tight mb-2"
+                >
+                  Kopi Arabika Gayo
+                </h3>
+                <p class="text-sm text-on-surface/60 flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[16px]"
+                    >scale</span
+                  >
+                  Per 250 Gr
+                </p>
+              </div>
+              <div
+                class="flex justify-between items-center pt-md border-t border-sage/10 mt-auto"
+              >
+                <p class="text-amber-accent font-bold text-xl">Rp 65.000</p>
+                <button
+                  class="bg-sage/20 text-primary hover:bg-sage/40 font-bold px-4 py-2 rounded-xl text-sm transition-colors flex items-center gap-1"
+                >
+                  Pesan
+                </button>
+              </div>
+            </div>
+          </div>
+          <!-- Product Card 3 -->
+          <div
+            class="bg-white rounded-2xl overflow-hidden shadow-sm border border-sage/10 flex flex-col h-full relative"
+          >
+            <div
+              class="absolute inset-0 bg-white/40 z-20 pointer-events-none backdrop-blur-[1px]"
+            ></div>
+            <div class="relative aspect-[4/3] overflow-hidden bg-slate-50">
+              <span
+                class="absolute top-md left-md bg-red-500/90 text-white text-xs px-3 py-1.5 rounded-full font-bold z-30 shadow-sm flex items-center gap-1"
+              >
+                <span class="material-symbols-outlined text-[14px]">block</span>
+                Habis
+              </span>
+              <img
+                alt="Jeruk Segar"
+                class="w-full h-full object-cover grayscale opacity-80"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDrOOQyCyzi10oL4PuXA6oLCajxlNm20Kch6CsrCeet8HoHYopz0TDGndi3crfolcJvgY2lgC7qSLJMR7vxyOEc0Dv_Q44akXqZpnFktuww4l0Mt548hn2bem45IOUnTZZrmaMHP2v5jLqH-PAIHjXu1J97OQZVMDB3CWw14LPxByu0XkbuNcTn-FjZah_GW3uriKSjTy_XbcAsuqUGe0JhetydrJrhkq7OBrBLEHecLYFXVWKZpBkvy_5JCB091-iZw0NatfZfsahk"
+              />
+            </div>
+            <div
+              class="p-lg flex flex-col flex-1 justify-between gap-md relative z-10"
+            >
+              <div>
+                <p
+                  class="text-xs text-sage font-bold uppercase tracking-widest mb-1"
+                >
+                  Buah
+                </p>
+                <h3
+                  class="font-headline text-lg text-primary font-bold leading-tight mb-2"
+                >
+                  Jeruk Siam Madu
+                </h3>
+                <p class="text-sm text-on-surface/60 flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[16px]"
+                    >scale</span
+                  >
+                  Per 1 Kg
+                </p>
+              </div>
+              <div
+                class="flex justify-between items-center pt-md border-t border-sage/10 mt-auto"
+              >
+                <p class="text-amber-accent font-bold text-xl opacity-60">
+                  Rp 28.000
+                </p>
+                <button
+                  class="bg-slate-100 text-slate-400 font-bold px-4 py-2 rounded-xl text-sm cursor-not-allowed"
+                >
+                  Habis
+                </button>
+              </div>
+            </div>
+          </div>
+          <!-- Product Card 4 -->
+          <div
+            class="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 group border border-sage/10 flex flex-col h-full"
+          >
+            <div class="relative aspect-[4/3] overflow-hidden bg-slate-50">
+              <span
+                class="absolute top-md left-md bg-amber-accent text-white text-xs px-3 py-1.5 rounded-full font-bold z-10 shadow-sm flex items-center gap-1"
+              >
+                <span class="material-symbols-outlined text-[14px]"
+                  >local_offer</span
+                >
+                Sale
+              </span>
+              <img
+                alt="Madu Hutan"
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCc7GHn0Js7LP4xJ3nX7UDpB4Dybti6nxNsp8yjfsvRXFTVPVSXQ199k-51ZlVlp01pxZgRK4WS-KZWJa5tvIBULw2KEsQfBgQCgQ6sQPOu8MRhWVatECpx2WB4acvPNEw0TK-jcxQCwbMRCPBTmPzCeoJgTu4Ui1jWkiDrwGviXjcejIpFuSVla5OaigKaW4ERMXjdsLVQufPL5lEIwMhtuczZF5Ay_AvO8oaLiOjazOq4fDk8S0h-7hdG8SjUo_sXFQ0PqK6ffHWl"
+              />
+            </div>
+            <div class="p-lg flex flex-col flex-1 justify-between gap-md">
+              <div>
+                <p
+                  class="text-xs text-sage font-bold uppercase tracking-widest mb-1"
+                >
+                  Olahan
+                </p>
+                <h3
+                  class="font-headline text-lg text-primary font-bold leading-tight mb-2"
+                >
+                  Madu Hutan Murni
+                </h3>
+                <p class="text-sm text-on-surface/60 flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[16px]"
+                    >scale</span
+                  >
+                  Per 350 Ml
+                </p>
+              </div>
+              <div
+                class="flex justify-between items-center pt-md border-t border-sage/10 mt-auto"
+              >
+                <div class="flex flex-col">
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs text-on-surface/50 line-through"
+                      >Rp 150.000</span
+                    >
+                    <span
+                      class="text-[10px] bg-red-100 text-red-600 font-bold px-1.5 py-0.5 rounded"
+                      >Diskon 20%</span
+                    >
+                  </div>
+                  <p class="text-amber-accent font-bold text-xl">Rp 120.000</p>
+                </div>
+                <button
+                  class="bg-sage/20 text-primary hover:bg-sage/40 font-bold px-4 py-2 rounded-xl text-sm transition-colors flex items-center gap-1"
+                >
+                  Pesan
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- 6. Testimonials Section -->
+    <section class="bg-beige-bg py-3xl">
+      <div class="max-w-7xl mx-auto px-lg">
+        <h2
+          class="font-headline text-3xl md:text-4xl text-primary text-center mb-xl font-bold"
+        >
+          Apa Kata Keluarga Jalaku
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-lg">
+          <div
+            class="bg-white p-xl rounded-3xl shadow-sm hover:shadow-md transition-shadow flex flex-col h-full border border-sage/10 relative"
+          >
+            <span
+              class="material-symbols-outlined text-sage/20 absolute top-xl right-xl text-6xl rotate-180"
+              >format_quote</span
+            >
+            <div class="flex gap-1 mb-6">
+              <span
+                class="material-symbols-outlined text-amber-accent fill text-lg"
+                >star</span
+              >
+              <span
+                class="material-symbols-outlined text-amber-accent fill text-lg"
+                >star</span
+              >
+              <span
+                class="material-symbols-outlined text-amber-accent fill text-lg"
+                >star</span
+              >
+              <span
+                class="material-symbols-outlined text-amber-accent fill text-lg"
+                >star</span
+              >
+              <span
+                class="material-symbols-outlined text-amber-accent fill text-lg"
+                >star</span
+              >
+            </div>
+            <p
+              class="italic text-on-surface/80 leading-relaxed text-lg flex-1 z-10 relative"
+            >
+              "Berasnya wangi sekali, beda dengan yang beli di pasar swalayan.
+              Langsung kerasa kalau ini baru dipanen."
+            </p>
+            <div
+              class="flex items-center gap-4 pt-8 mt-auto border-t border-sage/10 z-10 relative"
+            >
+              <div
+                class="w-14 h-14 rounded-full bg-sage/30 overflow-hidden ring-4 ring-white shadow-sm"
+              >
+                <img
+                  alt="Avatar"
+                  class="w-full h-full object-cover"
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuCcuLiUv3bHvALGQjdCx1uF76dmcS_EQpo18i4YjHM3dL7akLAzCzKSc47bzKmKc_jnsJHHeU7vezF12huPEi7_pDT7AY9U7d54O2xdLgQtKFGeFYF8T1S7H4pJHFiVJDQqKu9tMhwptwvzXGNbY-Wn4OT1obmT0_RVxG9seyFZFsbLRSfw8wuVwNe_eBOOtdc3rjfTJu6KZg2wfgr_yIfpBtyrF5pfcOY9LJqn6oD6qdFWMRSSbuNTxQBG5hdYY4mnEbVPk_J_T8WI"
+                />
+              </div>
+              <div>
+                <p class="font-bold text-primary text-lg">Ibu Ratna</p>
+                <p class="text-sm text-on-surface/50 flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[14px]"
+                    >location_on</span
+                  >
+                  Jakarta Selatan
+                </p>
+              </div>
+            </div>
+          </div>
+          <div
+            class="bg-white p-xl rounded-3xl shadow-sm hover:shadow-md transition-shadow flex flex-col h-full border border-sage/10 relative"
+          >
+            <span
+              class="material-symbols-outlined text-sage/20 absolute top-xl right-xl text-6xl rotate-180"
+              >format_quote</span
+            >
+            <div class="flex gap-1 mb-6">
+              <span
+                class="material-symbols-outlined text-amber-accent fill text-lg"
+                >star</span
+              >
+              <span
+                class="material-symbols-outlined text-amber-accent fill text-lg"
+                >star</span
+              >
+              <span
+                class="material-symbols-outlined text-amber-accent fill text-lg"
+                >star</span
+              >
+              <span
+                class="material-symbols-outlined text-amber-accent fill text-lg"
+                >star</span
+              >
+              <span
+                class="material-symbols-outlined text-amber-accent fill text-lg"
+                >star</span
+              >
+            </div>
+            <p
+              class="italic text-on-surface/80 leading-relaxed text-lg flex-1 z-10 relative"
+            >
+              "Kopinya mantap, packaging-nya juga aman. Senang bisa bantu petani
+              lokal secara langsung."
+            </p>
+            <div
+              class="flex items-center gap-4 pt-8 mt-auto border-t border-sage/10 z-10 relative"
+            >
+              <div
+                class="w-14 h-14 rounded-full bg-sage/30 overflow-hidden ring-4 ring-white shadow-sm"
+              >
+                <img
+                  alt="Avatar"
+                  class="w-full h-full object-cover"
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuC2sJpQNpq1pgDYYLg_rPg7oSCSm3_EKdoy80rwGRkbQWu_mDsWrdZYUWv_cbAcLw0swMWdAg19B9--N4zByycy1rpzQlcIb9XE1vtjnCsfIKQ728kUD9J392-riL7BZT0XmaOdwrYKG4uB5LcHSBqbDDyCbpJCOpyDOvvsBgyxjgPj4QZwMyn2FfexTBP-B2otnUA9G-wjePU46rhqoQRjr9rwNRvWnXEfCo4WBBZUBsioE-MLZFk0Mxe32_6Nc3j3Re2bATI1V38C"
+                />
+              </div>
+              <div>
+                <p class="font-bold text-primary text-lg">Pak Budi</p>
+                <p class="text-sm text-on-surface/50 flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[14px]"
+                    >location_on</span
+                  >
+                  Tangerang
+                </p>
+              </div>
+            </div>
+          </div>
+          <div
+            class="bg-white p-xl rounded-3xl shadow-sm hover:shadow-md transition-shadow flex flex-col h-full border border-sage/10 relative"
+          >
+            <span
+              class="material-symbols-outlined text-sage/20 absolute top-xl right-xl text-6xl rotate-180"
+              >format_quote</span
+            >
+            <div class="flex gap-1 mb-6">
+              <span
+                class="material-symbols-outlined text-amber-accent fill text-lg"
+                >star</span
+              >
+              <span
+                class="material-symbols-outlined text-amber-accent fill text-lg"
+                >star</span
+              >
+              <span
+                class="material-symbols-outlined text-amber-accent fill text-lg"
+                >star</span
+              >
+              <span
+                class="material-symbols-outlined text-amber-accent fill text-lg"
+                >star</span
+              >
+              <span
+                class="material-symbols-outlined text-amber-accent fill text-lg"
+                >star_half</span
+              >
+            </div>
+            <p
+              class="italic text-on-surface/80 leading-relaxed text-lg flex-1 z-10 relative"
+            >
+              "Sayurnya segar-segar banget, pas sampai masih ada embunnya.
+              Recomended banget buat stok mingguan."
+            </p>
+            <div
+              class="flex items-center gap-4 pt-8 mt-auto border-t border-sage/10 z-10 relative"
+            >
+              <div
+                class="w-14 h-14 rounded-full bg-sage/30 overflow-hidden ring-4 ring-white shadow-sm"
+              >
+                <img
+                  alt="Avatar"
+                  class="w-full h-full object-cover"
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuCI98N7icH1vityWXCxn4SiVhfsLb_7nQD3FUmRkyZLHgZozVfQ_4o1OKwmzhgzBpoCd1Wsy2luzTaDSHmKKZuuLqojjh3LPQDBnppOW52we1EWAc4PMNjbu8CRTjHSY-FbTChg7gjhxe4fJASZ43cDuya6fYudgzy19xYFfKe96KqDqTxuVe3lpoU13bgLsTaIBiApYMLJdzT-iDWDdQiOOMWsRStYQ68MiobnymSyf_JGSGlC-TonwIMOl7z2In-VguL3MrP9g0aL"
+                />
+              </div>
+              <div>
+                <p class="font-bold text-primary text-lg">Mba Siska</p>
+                <p class="text-sm text-on-surface/50 flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[14px]"
+                    >location_on</span
+                  >
+                  Bandung
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- 7. How to Order -->
+    <section class="py-3xl max-w-7xl mx-auto px-lg">
+      <div class="text-center mb-2xl">
+        <h2
+          class="font-headline text-3xl md:text-4xl text-primary font-bold mb-4"
+        >
+          Cara Pemesanan
+        </h2>
+        <p class="text-on-surface/70 max-w-2xl mx-auto">
+          Tiga langkah mudah untuk menikmati hasil bumi segar langsung dari
+          petani ke meja makan Anda.
+        </p>
+      </div>
+      <div
+        class="flex flex-col md:flex-row justify-between items-start gap-xl relative"
+      >
+        <!-- Connecting Line for Desktop -->
+        <div
+          class="hidden md:block absolute top-[44px] left-[15%] right-[15%] h-[2px] bg-gradient-to-r from-sage/20 via-sage to-sage/20 z-0"
+        ></div>
+        <div
+          class="flex flex-col items-center text-center flex-1 space-y-lg relative z-10 w-full group"
+        >
+          <div
+            class="w-24 h-24 bg-white border-4 border-sage rounded-full flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-300 relative"
+          >
+            <span class="font-headline text-4xl text-primary font-bold">1</span>
+            <div
+              class="absolute -bottom-3 -right-3 bg-amber-accent w-10 h-10 rounded-full flex items-center justify-center text-white border-2 border-white shadow-sm"
+            >
+              <span class="material-symbols-outlined text-xl"
+                >shopping_cart</span
+              >
+            </div>
+          </div>
+          <div>
+            <h3 class="font-headline text-xl text-primary font-bold mb-2">
+              Pilih Produk
+            </h3>
+            <p class="text-on-surface/70 leading-relaxed px-4">
+              Jelajahi katalog kami dan temukan produk segar favorit Anda.
+            </p>
+          </div>
+        </div>
+        <div
+          class="flex flex-col items-center text-center flex-1 space-y-lg relative z-10 w-full group"
+        >
+          <div
+            class="w-24 h-24 bg-white border-4 border-sage rounded-full flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-300 relative"
+          >
+            <span class="font-headline text-4xl text-primary font-bold">2</span>
+            <div
+              class="absolute -bottom-3 -right-3 bg-amber-accent w-10 h-10 rounded-full flex items-center justify-center text-white border-2 border-white shadow-sm"
+            >
+              <span class="material-symbols-outlined text-xl">chat</span>
+            </div>
+          </div>
+          <div>
+            <h3 class="font-headline text-xl text-primary font-bold mb-2">
+              Hubungi via WA
+            </h3>
+            <p class="text-on-surface/70 leading-relaxed px-4">
+              Konfirmasi pesanan dengan admin kami melalui WhatsApp.
+            </p>
+          </div>
+        </div>
+        <div
+          class="flex flex-col items-center text-center flex-1 space-y-lg relative z-10 w-full group"
+        >
+          <div
+            class="w-24 h-24 bg-primary text-white border-4 border-primary rounded-full flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-300 relative"
+          >
+            <span class="font-headline text-4xl font-bold">3</span>
+            <div
+              class="absolute -bottom-3 -right-3 bg-amber-accent w-10 h-10 rounded-full flex items-center justify-center text-white border-2 border-white shadow-sm"
+            >
+              <span class="material-symbols-outlined text-xl">home</span>
+            </div>
+          </div>
+          <div>
+            <h3 class="font-headline text-xl text-primary font-bold mb-2">
+              Terima di Rumah
+            </h3>
+            <p class="text-on-surface/70 leading-relaxed px-4">
+              Pesanan diantar langsung ke depan pintu rumah Anda.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- 8. Info Strip (Cards) -->
+    <section class="max-w-7xl mx-auto px-lg py-3xl pb-2xl">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-lg">
+        <div
+          class="bg-white rounded-2xl p-lg flex items-center gap-md shadow-md border border-sage/20 hover:border-sage/50 transition-colors"
+        >
+          <div
+            class="w-16 h-16 bg-beige-bg rounded-full flex items-center justify-center text-primary shadow-sm border border-sage/10"
+          >
+            <span class="material-symbols-outlined text-3xl"
+              >local_shipping</span
+            >
+          </div>
+          <div>
+            <p class="font-headline text-lg text-primary font-bold mb-1">
+              Area Pengiriman
+            </p>
+            <p class="text-sm text-on-surface/70">Jabodetabek &amp; Bandung</p>
+          </div>
+        </div>
+        <div
+          class="bg-white rounded-2xl p-lg flex items-center gap-md shadow-md border border-sage/20 hover:border-sage/50 transition-colors"
+        >
+          <div
+            class="w-16 h-16 bg-beige-bg rounded-full flex items-center justify-center text-primary shadow-sm border border-sage/10"
+          >
+            <span class="material-symbols-outlined text-3xl">payments</span>
+          </div>
+          <div>
+            <p class="font-headline text-lg text-primary font-bold mb-1">
+              Metode Bayar
+            </p>
+            <p class="text-sm text-on-surface/70">
+              Transfer Bank &amp; E-Wallet
+            </p>
+          </div>
+        </div>
+        <div
+          class="bg-white rounded-2xl p-lg flex items-center gap-md shadow-md border border-sage/20 hover:border-sage/50 transition-colors"
+        >
+          <div
+            class="w-16 h-16 bg-beige-bg rounded-full flex items-center justify-center text-primary shadow-sm border border-sage/10"
+          >
+            <span class="material-symbols-outlined text-3xl">schedule</span>
+          </div>
+          <div>
+            <p class="font-headline text-lg text-primary font-bold mb-1">
+              Estimasi Tiba
+            </p>
+            <p class="text-sm text-on-surface/70">1-2 Hari Kerja</p>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- 9. Footer Component -->
+    <footer class="bg-primary text-white border-t border-white/10">
+      <div
+        class="grid grid-cols-1 md:grid-cols-4 gap-xl px-lg py-3xl max-w-7xl mx-auto w-full"
+      >
+        <div class="space-y-md">
+          <div
+            class="font-headline text-3xl font-bold text-sage flex items-center gap-2"
+          >
+            <span class="material-symbols-outlined fill">potted_plant</span>
+            Jalaku
+          </div>
+          <p class="text-white/70 text-sm leading-relaxed">
+            Membawa hasil bumi terbaik Nusantara langsung ke meja makan keluarga
+            Anda dengan cinta dan integritas.
+          </p>
+        </div>
+        <div>
+          <h4 class="font-headline text-lg text-sage mb-md">Menu Utama</h4>
+          <ul class="space-y-sm text-sm">
+            <li>
+              <a
+                class="text-white/70 hover:text-white transition-colors"
+                href="#"
+                >Katalog Produk</a
+              >
+            </li>
+            <li>
+              <a
+                class="text-white/70 hover:text-white transition-colors"
+                href="#"
+                >Cek Status Pesanan</a
+              >
+            </li>
+            <li>
+              <a
+                class="text-white/70 hover:text-white transition-colors"
+                href="#"
+                >Tentang Petani Kami</a
+              >
+            </li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="font-headline text-lg text-sage mb-md">Bantuan</h4>
+          <ul class="space-y-sm text-sm">
+            <li>
+              <a
+                class="text-white/70 hover:text-white transition-colors"
+                href="#"
+                >Kebijakan Privasi</a
+              >
+            </li>
+            <li>
+              <a
+                class="text-white/70 hover:text-white transition-colors"
+                href="#"
+                >Syarat &amp; Ketentuan</a
+              >
+            </li>
+            <li>
+              <a
+                class="text-white/70 hover:text-white transition-colors"
+                href="#"
+                >FAQs</a
+              >
+            </li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="font-headline text-lg text-sage mb-md">Hubungi Kami</h4>
+          <button
+            class="bg-white text-primary font-bold px-md py-md rounded-lg flex items-center gap-2 hover:bg-sage transition-all w-full justify-center shadow-lg group"
+          >
+            <span class="material-symbols-outlined fill">chat</span>
+            Chat via WhatsApp
+          </button>
+          <div class="flex gap-md mt-lg justify-center md:justify-start">
+            <a
+              class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-all"
+              href="#"
+            >
+              <span class="material-symbols-outlined text-sm">share</span>
+            </a>
+            <a
+              class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-all"
+              href="#"
+            >
+              <span class="material-symbols-outlined text-sm">mail</span>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="border-t border-white/10 px-lg py-md text-center">
+        <p class="text-white/50 text-xs">
+          © 2024 Jalaku Indonesian Farm-Fresh. All rights reserved. Bangga hasil
+          bumi lokal.
+        </p>
+      </div>
+    </footer>
+    <!-- 10. Floating Action Button (FAB) -->
+    <button
+      class="fixed bottom-lg right-lg bg-[#25D366] text-white p-4 rounded-full shadow-2xl hover:scale-110 transition-transform z-50 flex items-center justify-center pulse-wa"
+    >
+      <svg
+        class="w-8 h-8"
+        fill="currentColor"
+        viewbox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"
+        ></path>
+      </svg>
+    </button>
+  </body>
+</html>

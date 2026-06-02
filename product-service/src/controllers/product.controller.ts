@@ -2,21 +2,6 @@ import multer from "multer";
 import { Request, Response } from "express";
 import { supabase } from "../lib/supabase";
 
-const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"];
-
-// Konfigurasi Multer
-export const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: { fileSize: 2 * 1024 * 1024 },
-  fileFilter: (_req, file, cb) => {
-    if (ALLOWED_MIME_TYPES.includes(file.mimetype)) {
-      cb(null, true);
-    } else {
-      cb(new Error("Format file tidak didukung. Gunakan JPG, PNG, atau WebP"));
-    }
-  },
-});
-
 // ─────────────────────────────────────────────────────────
 // GET /products
 // Ambil semua produk (Mendukung Filter & Pagination)
@@ -65,12 +50,24 @@ export async function getAllProducts(req: Request, res: Response) {
 // ─────────────────────────────────────────────────────────
 // GET /products/:slug
 // ─────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────
+// GET /products/:slug
+// ─────────────────────────────────────────────────────────
 export async function getProductBySlug(req: Request, res: Response) {
   try {
     const { slug } = req.params;
     const { data, error } = await supabase
       .from("products")
-      .select("*")
+      .select(
+        `
+        *,
+        product_images (
+          id,
+          image_url,
+          display_order
+        )
+      `,
+      )
       .eq("slug", slug)
       .single();
 
@@ -78,6 +75,27 @@ export async function getProductBySlug(req: Request, res: Response) {
       res.status(404).json({ error: "Produk tidak ditemukan" });
       return;
     }
+
+    // Urutkan galeri foto berdasarkan display_order
+    if (data.product_images) {
+      data.product_images.sort(
+        (a: any, b: any) => a.display_order - b.display_order,
+      );
+    } else {
+      data.product_images = [];
+    }
+
+    // Fallback jika belum ada foto
+    if (data.product_images.length === 0) {
+      data.product_images = [
+        {
+          id: "default-image",
+          image_url: "https://placehold.co/600x400?text=Foto+Belum+Tersedia",
+          display_order: 1,
+        },
+      ];
+    }
+
     res.json({ data });
   } catch (error) {
     res.status(500).json({ error: "Gagal mengambil data produk" });
@@ -98,7 +116,6 @@ export async function createProduct(req: Request, res: Response) {
       satuan,
       stok,
       status,
-      foto_url,
       catatan_musim,
       tersedia_mulai,
     } = req.body;
@@ -119,7 +136,6 @@ export async function createProduct(req: Request, res: Response) {
         kategori,
         harga,
         satuan,
-        foto_url,
         catatan_musim,
         tersedia_mulai,
         stok: stok ?? 0,
@@ -141,53 +157,6 @@ export async function createProduct(req: Request, res: Response) {
   }
 }
 
-export async function uploadFotoProduk(req: Request, res: Response) {
-  try {
-    if (!req.file) {
-      res.status(400).json({ error: "File foto tidak ditemukan" });
-      return;
-    }
-
-    // Pemetaan Ekstensi yang Aman (Anti Bom Waktu)
-    const mimeToExt: Record<string, string> = {
-      "image/jpeg": "jpg",
-      "image/png": "png",
-      "image/webp": "webp",
-    };
-    const fileExt = mimeToExt[req.file.mimetype] || "jpg";
-
-    // Nama file unik
-    const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
-
-    // Upload ke Supabase Storage
-    const { error } = await supabase.storage
-      .from("product-images")
-      .upload(fileName, req.file.buffer, {
-        contentType: req.file.mimetype,
-        upsert: false,
-      });
-
-    if (error) throw error;
-
-    // Ambil public URL
-    const { data: urlData } = supabase.storage
-      .from("product-images")
-      .getPublicUrl(fileName);
-
-    // Kembalikan URL dan fileName (Standar API)
-    res.status(201).json({
-      data: {
-        url: urlData.publicUrl,
-        fileName: fileName,
-      },
-      message: "Foto berhasil diunggah",
-    });
-  } catch (error) {
-    res
-      .status(500)
-      .json({ error: "Gagal mengunggah foto ke Supabase Storage" });
-  }
-}
 // ─────────────────────────────────────────────────────────
 // PATCH /products/:id (Admin Only)
 // ─────────────────────────────────────────────────────────
@@ -205,7 +174,6 @@ export async function updateProduct(req: Request, res: Response) {
       satuan,
       stok,
       status,
-      foto_url,
       catatan_musim,
       tersedia_mulai,
     } = req.body;
@@ -221,7 +189,6 @@ export async function updateProduct(req: Request, res: Response) {
         satuan,
         stok,
         status,
-        foto_url,
         catatan_musim,
         tersedia_mulai,
       }),
@@ -259,11 +226,34 @@ export async function updateProduct(req: Request, res: Response) {
 export async function deleteProduct(req: Request, res: Response) {
   try {
     const { id } = req.params;
-    const { error } = await supabase.from("products").delete().eq("id", id);
 
+    // 1. Ambil semua image_url dari product_images
+    const { data: images } = await supabase
+      .from("product_images")
+      .select("image_url")
+      .eq("product_id", id);
+
+    // 2. Hapus file dari storage (jika ada)
+    if (images && images.length > 0) {
+      const filePaths = images
+        .map((img) => {
+          const parts = img.image_url.split(
+            "/storage/v1/object/public/product-images/",
+          );
+          return parts.length === 2 ? parts[1] : null;
+        })
+        .filter(Boolean) as string[];
+      if (filePaths.length) {
+        await supabase.storage.from("product-images").remove(filePaths);
+      }
+    }
+
+    // 3. Hapus produk (cascade akan hapus record product_images)
+    const { error } = await supabase.from("products").delete().eq("id", id);
     if (error) throw error;
+
     res.json({ message: "Produk berhasil dihapus" });
   } catch (error) {
-    res.status(500).json({ error: "Gagal menghapus produk" });
+    res.status(500).json({ error: "Gagal hapus produk" });
   }
 }

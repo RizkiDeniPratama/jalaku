@@ -14,6 +14,7 @@ export async function getAllBookings(req: Request, res: Response) {
     const { data, error, count } = await supabase
       .from("bookings")
       .select("*, products(nama, satuan)", { count: "exact" }) // Relasi ke nama produk
+      .is("deleted_at", null)
       .order("created_at", { ascending: false })
       .range(from, to);
 
@@ -145,6 +146,7 @@ export async function getBookingById(req: Request, res: Response) {
       .from("bookings")
       .select("*")
       .eq("id", id)
+      .is("deleted_at", null)
       .single();
 
     if (error) {
@@ -154,5 +156,55 @@ export async function getBookingById(req: Request, res: Response) {
     res.json({ data });
   } catch (error) {
     res.status(500).json({ error: "Gagal mengambil data reservasi" });
+  }
+}
+
+export async function cancelBooking(req: Request, res: Response) {
+  try {
+    const { id } = req.params;
+    const { no_wa, cancel_reason } = req.body;
+
+    if (!no_wa) {
+      res
+        .status(400)
+        .json({ error: "Nomor WA wajib diisi untuk cancel booking" });
+      return;
+    }
+
+    const { data: booking, error: findError } = await supabase
+      .from("bookings")
+      .select("id, status, no_wa")
+      .eq("id", id)
+      .eq("no_wa", no_wa)
+      .is("deleted_at", null)
+      .single();
+
+    if (findError || !booking) {
+      res.status(404).json({ error: "Booking tidak ditemukan" });
+      return;
+    }
+
+    if (booking.status !== "pending") {
+      res.status(400).json({
+        error: `Booking tidak bisa dibatalkan. Status saat ini: ${booking.status}`,
+      });
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from("bookings")
+      .update({
+        status: "cancelled",
+        cancel_reason: cancel_reason || null,
+      })
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    res.json({ data, message: "Booking berhasil dibatalkan" });
+  } catch (error) {
+    res.status(500).json({ error: "Gagal membatalkan booking" });
   }
 }

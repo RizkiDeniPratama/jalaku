@@ -1,7 +1,8 @@
 import express from "express";
 import cors from "cors";
 import { supabase } from "./lib/supabase";
-import productRoutes from "../../product-service/src/routes/product.routes";
+import productRoutes from "./routes/product.routes";
+import productImageRoutes from "./routes/product-image.routes";
 
 const app = express();
 const PORT = process.env.PORT || 3002;
@@ -29,6 +30,7 @@ app.get("/health", async (req, res) => {
 });
 
 app.use("/products", productRoutes);
+app.use("/products", productImageRoutes);
 
 app.listen(PORT, () => {
   console.log(`✅ product-service berjalan di port ${PORT}`);

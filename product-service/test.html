@@ -1,0 +1,70 @@
+<!doctype html>
+<html>
+  <body>
+    <h2>Test Upload Galeri Produk</h2>
+    <form id="uploadForm">
+      <input
+        type="file"
+        id="fileInput"
+        name="fotos"
+        multiple
+        accept="image/*"
+      /><br /><br />
+      <button type="submit">Upload Sekarang</button>
+    </form>
+    <pre
+      id="hasil"
+      style="background: #eee; padding: 10px; margin-top: 20px"
+    ></pre>
+
+    <script>
+      document
+        .getElementById("uploadForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const files = document.getElementById("fileInput").files;
+          const formData = new FormData();
+          for (let i = 0; i < files.length; i++) {
+            formData.append("fotos", files[i]);
+          }
+
+          // ⚠️ PASTIKAN DUA VARIABEL INI SUDAH KAMU GANTI DENGAN DATA ASLI!
+          const url =
+            "http://localhost:3002/products/f608f394-c2ab-46b7-9bea-a4310f836bc9/images";
+          const token =
+            "eyJhbGciOiJFUzI1NiIsImtpZCI6IjM1M2Q3ZTg4LTY2YTEtNGY4Yy04MWJiLTEzNTQ4M2UwZGJhMiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2Fhb2xudGxjYm9lbWFqbW5xaXR0LnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiJhYTUwMGQ0MC0wMjkzLTQ3NmUtYWIwOC0wNDliZDIwMWUwN2UiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzgwMzAxODI5LCJpYXQiOjE3ODAyOTgyMjksImVtYWlsIjoibXIuZGVuaXNtd0BnbWFpbC5jb20iLCJwaG9uZSI6IiIsImFwcF9tZXRhZGF0YSI6eyJwcm92aWRlciI6ImVtYWlsIiwicHJvdmlkZXJzIjpbImVtYWlsIl19LCJ1c2VyX21ldGFkYXRhIjp7ImVtYWlsX3ZlcmlmaWVkIjp0cnVlfSwicm9sZSI6ImF1dGhlbnRpY2F0ZWQiLCJhYWwiOiJhYWwxIiwiYW1yIjpbeyJtZXRob2QiOiJwYXNzd29yZCIsInRpbWVzdGFtcCI6MTc4MDI5ODIyOX1dLCJzZXNzaW9uX2lkIjoiMzNhZDA0YjEtZDJlOC00YzE0LWE0NTQtMTIzZTg5ODE5Mjk1IiwiaXNfYW5vbnltb3VzIjpmYWxzZX0.p120_Ymo6d5x7jjhnb2ysGj__8WcXjk34WrDMTFAPxqiJuLrTYTkcReca-tEO0uSj5BcnZW37N201voGqg0x8A";
+
+          try {
+            document.getElementById("hasil").innerText =
+              "Loading... sedang mengunggah ke Supabase...";
+            const response = await fetch(url, {
+              method: "POST",
+              headers: { Authorization: `Bearer ${token}` },
+              body: formData,
+            });
+
+            // TRIK DEBUGGING: Ambil balasan server sebagai teks mentah dulu!
+            const responseText = await response.text();
+
+            try {
+              // Coba jadikan JSON
+              const result = JSON.parse(responseText);
+              document.getElementById("hasil").innerText = JSON.stringify(
+                result,
+                null,
+                2,
+              );
+            } catch (parseError) {
+              // Jika gagal (berarti server mengirim HTML/Teks Error)
+              document.getElementById("hasil").innerText =
+                "🔴 ERROR SERVER MENTAH (Bukan JSON):\n\n" + responseText;
+            }
+          } catch (err) {
+            document.getElementById("hasil").innerText =
+              "🔴 GAGAL KONEKSI KE SERVER:\n" + err.message;
+          }
+        });
+    </script>
+  </body>
+</html>

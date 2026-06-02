@@ -244,3 +244,78 @@ export async function getOrderById(req: Request, res: Response) {
     res.status(500).json({ error: "Gagal mengambil data order" });
   }
 }
+
+export async function cancelOrder(req: Request, res: Response) {
+  try {
+    const { id } = req.params;
+    const { no_wa, cancel_reason } = req.body;
+
+    if (!no_wa) {
+      res
+        .status(400)
+        .json({ error: "Nomor WA wajib diisi untuk membatalkan pesanan" });
+      return;
+    }
+
+    // 1. Cari order
+    const { data: order, error: findError } = await supabase
+      .from("orders")
+      .select("id, status, no_wa, items")
+      .eq("id", id)
+      .eq("no_wa", no_wa)
+      .single();
+
+    if (findError || !order) {
+      res
+        .status(404)
+        .json({ error: "Pesanan tidak ditemukan atau nomor WA salah" });
+      return;
+    }
+
+    // 2. Validasi status
+    if (order.status !== "new") {
+      res.status(400).json({
+        error: `Pesanan tidak bisa dibatalkan karena sudah masuk tahap: ${order.status}`,
+      });
+      return;
+    }
+
+    // 3. Kembalikan stok (Pendekatan JS Loop untuk MVP)
+    const items = order.items as Array<{ product_id: string; jumlah: number }>;
+
+    for (const item of items) {
+      const { data: product } = await supabase
+        .from("products")
+        .select("stok")
+        .eq("id", item.product_id)
+        .single();
+
+      if (product) {
+        await supabase
+          .from("products")
+          .update({ stok: product.stok + item.jumlah })
+          .eq("id", item.product_id);
+      }
+    }
+
+    // 4. Update status & alasan
+    const { data, error } = await supabase
+      .from("orders")
+      .update({
+        status: "cancelled",
+        cancel_reason: cancel_reason || "Dibatalkan oleh pelanggan",
+      })
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    res.json({
+      data,
+      message: "Pesanan berhasil dibatalkan dan stok telah dikembalikan",
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Gagal membatalkan pesanan" });
+  }
+}
