@@ -1,0 +1,204 @@
+---
+/**
+ * Jalaku — Halaman Detail Produk
+ *
+ * Dynamic route: /produk/:slug
+ * SSR: fetch GET /products/:slug di frontmatter.
+ * Layout 2-kolom: galeri (kiri) + info/aksi (kanan).
+ */
+export const prerender = false;
+
+import CustomerLayout from '../../layouts/CustomerLayout.astro';
+import ImageCarousel from '../../components/customer/ImageCarousel.tsx';
+import AddToCartButton from '../../components/customer/AddToCartButton.tsx';
+import BookingForm from '../../components/customer/BookingForm.tsx';
+
+const { slug } = Astro.params;
+const PRODUCT_URL = import.meta.env.PUBLIC_PRODUCT_SERVICE_URL || 'http://localhost:3002';
+
+// SSR fetch
+let product: any = null;
+try {
+  const res = await fetch(`${PRODUCT_URL}/products/${slug}`);
+  if (res.ok) {
+    const json = await res.json();
+    product = json.data;
+  }
+} catch {}
+
+// 404 redirect jika produk tidak ditemukan
+if (!product) {
+  return Astro.redirect('/produk');
+}
+
+const images = product.product_images || [];
+const isPreOrder = product.status === 'pre_order';
+const isUnavailable = product.status === 'unavailable';
+const isReady = product.status === 'ready';
+const thumb = images[0]?.image_url;
+
+const KATEGORI_LABELS: Record<string, string> = {
+  gabah: 'Gabah', beras: 'Beras', kopi: 'Kopi',
+  alpukat: 'Alpukat', jagung: 'Jagung', olahan_dapur: 'Olahan Dapur',
+};
+
+const STATUS_CONFIG: Record<string, { label: string; class: string }> = {
+  ready: { label: 'Ready Stock', class: 'bg-success/15 text-success' },
+  unavailable: { label: 'Habis', class: 'bg-danger/15 text-danger' },
+  pre_order: { label: 'Pre-Order', class: 'bg-warning/15 text-warning' },
+};
+
+const statusCfg = STATUS_CONFIG[product.status] || { label: product.status, class: 'bg-gray-100 text-gray-600' };
+
+function formatRupiah(value: number): string {
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency', currency: 'IDR', minimumFractionDigits: 0,
+  }).format(value);
+}
+---
+
+<CustomerLayout title={product.nama} description={product.deskripsi || `Beli ${product.nama} di Jalaku`} activeMenu="katalog">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
+
+    <!-- Breadcrumb -->
+    <nav class="flex items-center gap-2 text-sm mb-6 sm:mb-8">
+      <a href="/produk" class="text-text-muted hover:text-primary transition-colors">Katalog</a>
+      <svg class="w-4 h-4 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+      </svg>
+      <span class="text-text font-medium truncate">{product.nama}</span>
+    </nav>
+
+    <!-- Main Content: 2 columns -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+
+      <!-- Left: Image Gallery -->
+      <div>
+        <ImageCarousel
+          client:visible
+          images={images}
+          productName={product.nama}
+        />
+      </div>
+
+      <!-- Right: Product Info -->
+      <div class="space-y-6">
+
+        <!-- Category + Status -->
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="px-3 py-1 rounded-lg bg-gray-100 text-xs font-semibold text-text-light">
+            {KATEGORI_LABELS[product.kategori] || product.kategori}
+          </span>
+          <span class:list={[
+            'px-3 py-1 rounded-lg text-xs font-semibold',
+            statusCfg.class
+          ]}>
+            {statusCfg.label}
+          </span>
+        </div>
+
+        <!-- Nama -->
+        <h1 class="text-2xl sm:text-3xl font-bold text-text leading-tight" style="font-family: Outfit, sans-serif;">
+          {product.nama}
+        </h1>
+
+        <!-- Harga -->
+        <div class="flex items-baseline gap-2">
+          <span class="text-3xl font-bold text-primary" style="font-family: Outfit, sans-serif;">
+            {formatRupiah(product.harga)}
+          </span>
+          <span class="text-base text-text-muted">/ {product.satuan}</span>
+        </div>
+
+        <!-- Stok Info -->
+        {isReady && (
+          <div class="flex items-center gap-2">
+            <div class:list={[
+              'w-2 h-2 rounded-full',
+              product.stok > 5 ? 'bg-success' : product.stok > 0 ? 'bg-warning' : 'bg-danger'
+            ]}></div>
+            <span class:list={[
+              'text-sm font-medium',
+              product.stok > 5 ? 'text-success' : product.stok > 0 ? 'text-warning' : 'text-danger'
+            ]}>
+              {product.stok > 5
+                ? `Stok tersedia (${product.stok} ${product.satuan})`
+                : product.stok > 0
+                  ? `Sisa ${product.stok} ${product.satuan}`
+                  : 'Stok habis'}
+            </span>
+          </div>
+        )}
+
+        <!-- Catatan Musim (Pre-order) -->
+        {isPreOrder && product.catatan_musim && (
+          <div class="flex items-start gap-3 px-4 py-3 rounded-xl bg-warning/10 border border-warning/20">
+            <svg class="w-5 h-5 text-warning shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div>
+              <p class="text-sm font-semibold text-warning">Produk Musiman</p>
+              <p class="text-sm text-text-light mt-0.5">{product.catatan_musim}</p>
+              {product.tersedia_mulai && (
+                <p class="text-xs text-text-muted mt-1">
+                  Tersedia mulai: {new Date(product.tersedia_mulai).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+
+        <!-- Divider -->
+        <hr class="border-gray-100" />
+
+        <!-- Deskripsi -->
+        {product.deskripsi && (
+          <div>
+            <h3 class="text-sm font-semibold text-text mb-2">Deskripsi</h3>
+            <p class="text-sm text-text-light leading-relaxed whitespace-pre-line">
+              {product.deskripsi}
+            </p>
+          </div>
+        )}
+
+        <!-- Action: Add to Cart OR Booking Form -->
+        <div class="pt-2">
+          {isReady && (
+            <AddToCartButton
+              client:load
+              productId={product.id}
+              slug={product.slug}
+              nama={product.nama}
+              harga={product.harga}
+              satuan={product.satuan}
+              stok={product.stok}
+              imageUrl={thumb}
+            />
+          )}
+
+          {isPreOrder && (
+            <BookingForm
+              client:load
+              productId={product.id}
+              productName={product.nama}
+              satuan={product.satuan}
+            />
+          )}
+
+          {isUnavailable && (
+            <div class="bg-gray-50 rounded-2xl p-6 text-center">
+              <svg class="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+              </svg>
+              <p class="text-sm text-text-light font-medium">Produk ini sedang tidak tersedia</p>
+              <a href="/produk" class="inline-flex items-center gap-1 mt-3 text-sm text-primary font-medium hover:underline">
+                ← Lihat produk lainnya
+              </a>
+            </div>
+          )}
+        </div>
+
+      </div>
+    </div>
+  </div>
+</CustomerLayout>

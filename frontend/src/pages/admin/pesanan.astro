@@ -1,0 +1,8 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import OrderTable from '../../components/admin/OrderTable.tsx';
+---
+
+<AdminLayout title="Kelola Pesanan" activeMenu="pesanan">
+  <OrderTable client:load />
+</AdminLayout>

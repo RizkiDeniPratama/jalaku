@@ -1,0 +1,190 @@
+---
+/**
+ * Jalaku — ProductCard (Astro Component)
+ *
+ * Card produk untuk halaman katalog.
+ * Statis (0 KB JS) — tidak butuh state/interaksi.
+ *
+ * Fitur:
+ * - Thumbnail gambar (fallback jika kosong)
+ * - Kategori badge
+ * - Status badge (Ready/Habis/Pre-Order)
+ * - Harga + satuan
+ * - Hover: scale + shadow
+ * - Dimmed style untuk status unavailable
+ */
+
+interface ProductImage {
+  id: string;
+  image_url: string;
+  display_order: number;
+}
+
+interface Props {
+  id: string;
+  nama: string;
+  slug: string;
+  kategori: string;
+  harga: number;
+  satuan: string;
+  stok: number;
+  status: string;
+  catatan_musim?: string;
+  product_images?: ProductImage[];
+}
+
+const {
+  nama, slug, kategori, harga, satuan, stok, status,
+  catatan_musim, product_images = []
+} = Astro.props;
+
+const thumb = product_images?.[0]?.image_url;
+const isUnavailable = status === 'unavailable';
+
+const KATEGORI_LABELS: Record<string, string> = {
+  gabah: 'Gabah',
+  beras: 'Beras',
+  kopi: 'Kopi',
+  alpukat: 'Alpukat',
+  jagung: 'Jagung',
+  olahan_dapur: 'Olahan Dapur',
+};
+
+const KATEGORI_ICONS: Record<string, string> = {
+  gabah: 'grass',
+  beras: 'grass',
+  kopi: 'coffee_maker',
+  alpukat: 'nutrition',
+  jagung: 'nutrition',
+  olahan_dapur: 'soup_kitchen',
+};
+
+const STATUS_CONFIG: Record<string, { label: string; icon: string; class: string; badgeClass: string }> = {
+  ready: {
+    label: 'Tersedia',
+    icon: 'check_circle',
+    class: 'bg-primary text-white',
+    badgeClass: '',
+  },
+  unavailable: {
+    label: 'Habis',
+    icon: 'block',
+    class: 'bg-red-500/90 text-white',
+    badgeClass: '',
+  },
+  pre_order: {
+    label: 'Pre-Order',
+    icon: 'schedule',
+    class: 'bg-amber-accent text-white',
+    badgeClass: '',
+  },
+};
+
+const statusCfg = STATUS_CONFIG[status] || { label: status, icon: 'info', class: 'bg-gray-100 text-gray-600', badgeClass: '' };
+
+function formatRupiah(value: number): string {
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0,
+  }).format(value);
+}
+
+const showSeasonNote = status === 'pre_order' && !!catatan_musim;
+const showLowStock = status === 'ready' && stok > 0 && stok <= 5;
+---
+
+<a
+  href={`/produk/${slug}`}
+  class:list={[
+    'group block bg-white rounded-2xl overflow-hidden transition-all duration-300 border border-sage/10',
+    isUnavailable
+      ? 'opacity-70 relative'
+      : 'shadow-sm hover:shadow-lg hover:-translate-y-1'
+  ]}
+>
+  <!-- Unavailable overlay -->
+  {isUnavailable && (
+    <div class="absolute inset-0 bg-white/40 z-20 pointer-events-none backdrop-blur-[1px]"></div>
+  )}
+
+  <!-- Image -->
+  <div class="relative aspect-[4/3] overflow-hidden bg-gray-50">
+    {thumb ? (
+      <img
+        src={thumb}
+        alt={nama}
+        class:list={[
+          'w-full h-full object-cover transition-transform duration-500',
+          isUnavailable ? 'grayscale opacity-80' : 'group-hover:scale-105'
+        ]}
+        loading="lazy"
+      />
+    ) : (
+      <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-beige-bg to-sage/10">
+        <span class="material-symbols-outlined text-5xl text-sage/40">
+          {KATEGORI_ICONS[kategori] || 'eco'}
+        </span>
+      </div>
+    )}
+
+    <!-- Status badge (top-left) -->
+    <div class="absolute top-3 left-3 z-30">
+      <span class:list={[
+        'px-3 py-1.5 rounded-full text-xs font-bold shadow-sm inline-flex items-center gap-1',
+        statusCfg.class
+      ]}>
+        <span class="material-symbols-outlined text-[14px]">{statusCfg.icon}</span>
+        {statusCfg.label}
+      </span>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="p-5 flex flex-col flex-1 justify-between gap-3">
+    <div>
+      <p class="text-xs text-sage font-bold uppercase tracking-widest mb-1">
+        {KATEGORI_LABELS[kategori] || kategori}
+      </p>
+      <h3 class="font-heading text-lg text-primary font-bold leading-tight mb-2 line-clamp-2">
+        {nama}
+      </h3>
+      <p class="text-sm text-on-surface/60 flex items-center gap-1">
+        <span class="material-symbols-outlined text-[16px]">scale</span>
+        Per {satuan}
+      </p>
+    </div>
+
+    {showSeasonNote && (
+      <p class="text-xs text-amber-accent flex items-center gap-1 font-medium">
+        <span class="material-symbols-outlined text-[14px]">schedule</span>
+        {catatan_musim}
+      </p>
+    )}
+
+    {showLowStock && (
+      <p class="text-xs text-danger font-medium flex items-center gap-1">
+        <span class="material-symbols-outlined text-[14px]">warning</span>
+        Sisa {stok} {satuan}
+      </p>
+    )}
+
+    <div class="flex justify-between items-center pt-3 border-t border-sage/10 mt-auto">
+      <p class:list={[
+        'text-amber-accent font-bold text-xl',
+        isUnavailable && 'opacity-60'
+      ]}>
+        {formatRupiah(harga)}
+      </p>
+      {isUnavailable ? (
+        <span class="bg-gray-100 text-gray-400 font-bold px-4 py-2 rounded-xl text-sm cursor-not-allowed">
+          Habis
+        </span>
+      ) : (
+        <span class="bg-sage/20 text-primary group-hover:bg-sage/40 font-bold px-4 py-2 rounded-xl text-sm transition-colors flex items-center gap-1">
+          Pesan
+        </span>
+      )}
+    </div>
+  </div>
+</a>

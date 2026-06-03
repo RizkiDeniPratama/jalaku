@@ -1,0 +1,127 @@
+---
+/**
+ * Jalaku — Header Publik
+ *
+ * Navigasi utama untuk halaman customer-facing.
+ * Sticky glassmorphism navbar dengan logo, navigasi, cart badge.
+ */
+import CartBadge from '../common/CartBadge.tsx';
+
+interface Props {
+  activeMenu?: string;
+}
+
+const { activeMenu } = Astro.props;
+
+const navItems = [
+  { href: '/produk', label: 'Katalog', id: 'katalog' },
+  { href: '/lacak', label: 'Cek Status', id: 'lacak' },
+];
+---
+
+<header
+  id="main-header"
+  class="fixed top-0 w-full z-50 transition-all duration-300"
+>
+  <!-- Glassmorphism background -->
+  <div class="absolute inset-0 bg-surface/80 backdrop-blur-xl border-b border-sage/20"></div>
+
+  <div class="relative max-w-7xl mx-auto px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16 sm:h-[72px]">
+
+      <!-- Logo -->
+      <a href="/" class="flex items-center gap-2.5 group">
+        <span class="material-symbols-outlined fill text-sage text-3xl group-hover:scale-110 transition-transform">potted_plant</span>
+        <span class="font-heading text-2xl font-bold text-primary tracking-tight">
+          Jalaku
+        </span>
+      </a>
+
+      <!-- Desktop Navigation -->
+      <nav class="hidden md:flex items-center gap-1">
+        {navItems.map(item => (
+          <a
+            href={item.href}
+            class:list={[
+              'px-5 py-2 rounded-xl text-sm font-medium transition-all duration-200',
+              activeMenu === item.id
+                ? 'bg-primary/10 text-primary'
+                : 'text-on-surface/70 hover:text-primary hover:bg-sage/10'
+            ]}
+          >
+            {item.label}
+          </a>
+        ))}
+      </nav>
+
+      <!-- Right: Cart + Mobile Menu -->
+      <div class="flex items-center gap-2">
+        <!-- Cart Badge (React Island) -->
+        <CartBadge client:load />
+
+        <!-- Mobile Hamburger -->
+        <button
+          id="mobile-menu-btn"
+          class="md:hidden p-2 rounded-xl hover:bg-sage/10 transition-colors cursor-pointer"
+          aria-label="Menu navigasi"
+          aria-expanded="false"
+        >
+          <svg id="menu-icon-open" class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+          <svg id="menu-icon-close" class="w-6 h-6 text-primary hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Dropdown Menu -->
+  <div
+    id="mobile-menu"
+    class="md:hidden hidden absolute top-full left-0 right-0 bg-surface/95 backdrop-blur-xl border-b border-sage/20 shadow-lg animate-slide-down"
+  >
+    <nav class="max-w-7xl mx-auto px-6 py-4 space-y-1">
+      {navItems.map(item => (
+        <a
+          href={item.href}
+          class:list={[
+            'flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-colors',
+            activeMenu === item.id
+              ? 'bg-primary/10 text-primary'
+              : 'text-on-surface/70 hover:text-primary hover:bg-sage/10'
+          ]}
+        >
+          {item.label}
+        </a>
+      ))}
+    </nav>
+  </div>
+</header>
+
+<script>
+  // Mobile menu toggle
+  const btn = document.getElementById("mobile-menu-btn");
+  const menu = document.getElementById("mobile-menu");
+  const iconOpen = document.getElementById("menu-icon-open");
+  const iconClose = document.getElementById("menu-icon-close");
+
+  btn?.addEventListener("click", () => {
+    const isOpen = !menu?.classList.contains("hidden");
+    menu?.classList.toggle("hidden");
+    iconOpen?.classList.toggle("hidden");
+    iconClose?.classList.toggle("hidden");
+    btn?.setAttribute("aria-expanded", String(!isOpen));
+  });
+
+  // Close menu when clicking outside
+  document.addEventListener("click", (e) => {
+    const target = e.target as HTMLElement;
+    if (!btn?.contains(target) && !menu?.contains(target)) {
+      menu?.classList.add("hidden");
+      iconOpen?.classList.remove("hidden");
+      iconClose?.classList.add("hidden");
+    }
+  });
+</script>

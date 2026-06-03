@@ -1,0 +1,8 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import ProductTable from '../../../components/admin/ProductTable.tsx';
+---
+
+<AdminLayout title="Kelola Produk" activeMenu="produk">
+  <ProductTable client:load />
+</AdminLayout>

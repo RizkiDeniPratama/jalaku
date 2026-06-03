@@ -1,0 +1,19 @@
+---
+export const prerender = false;
+
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import ProductForm from '../../../components/admin/ProductForm.tsx';
+import ImageUploader from '../../../components/admin/ImageUploader.tsx';
+
+// Parameter URL: /admin/produk/:id
+// Nilai 'id' di sini sebenarnya adalah SLUG produk (bukan UUID)
+// karena link dari ProductTable menggunakan product.slug
+const { id: productSlug } = Astro.params;
+---
+
+<AdminLayout title="Edit Produk" activeMenu="produk">
+  <div class="space-y-8">
+    <ProductForm client:load productSlug={productSlug} />
+    {productSlug && <ImageUploader client:load productSlug={productSlug} />}
+  </div>
+</AdminLayout>

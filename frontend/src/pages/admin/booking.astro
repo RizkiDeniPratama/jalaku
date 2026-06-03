@@ -1,0 +1,8 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import BookingTable from '../../components/admin/BookingTable.tsx';
+---
+
+<AdminLayout title="Kelola Booking" activeMenu="booking">
+  <BookingTable client:load />
+</AdminLayout>

@@ -1,0 +1,31 @@
+---
+/**
+ * Jalaku — Customer Layout
+ *
+ * Layout wrapper untuk semua halaman publik (customer-facing).
+ * Extends BaseLayout untuk SEO/fonts + menambahkan Header + Footer.
+ */
+import BaseLayout from './BaseLayout.astro';
+import Header from '../components/common/Header.astro';
+import Footer from '../components/common/Footer.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+  activeMenu?: string;
+}
+
+const { title, description, activeMenu } = Astro.props;
+---
+
+<BaseLayout title={title} description={description}>
+  <div class="flex flex-col min-h-screen">
+    <Header activeMenu={activeMenu} />
+
+    <main class="flex-1">
+      <slot />
+    </main>
+
+    <Footer />
+  </div>
+</BaseLayout>

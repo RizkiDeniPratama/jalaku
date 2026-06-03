@@ -1,0 +1,30 @@
+---
+/**
+ * Jalaku — Halaman Lacak Pesanan
+ *
+ * Menampilkan OrderTracker (React Island) yang memungkinkan
+ * customer mencari pesanan berdasarkan nomor WhatsApp.
+ */
+import CustomerLayout from '../layouts/CustomerLayout.astro';
+import OrderTracker from '../components/customer/OrderTracker.tsx';
+---
+
+<CustomerLayout title="Lacak Pesanan" activeMenu="lacak">
+
+  <!-- Mini Hero -->
+  <section class="bg-gradient-to-r from-primary-dark to-primary py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h1 class="text-2xl sm:text-3xl font-bold text-white tracking-tight" style="font-family: Outfit, sans-serif;">
+        Lacak Pesanan 🔍
+      </h1>
+      <p class="text-sm text-white/60 mt-1">
+        Cek status pesanan Anda menggunakan nomor WhatsApp.
+      </p>
+    </div>
+  </section>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+    <OrderTracker client:load />
+  </div>
+
+</CustomerLayout>

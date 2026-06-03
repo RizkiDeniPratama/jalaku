@@ -1,0 +1,447 @@
+---
+/**
+ * Jalaku — Landing Page
+ *
+ * Halaman utama yang menampilkan:
+ * - Hero section (image carousel + headline)
+ * - Value pillars
+ * - Product categories
+ * - Featured products (dari API)
+ * - Testimonials (static)
+ * - How to order steps
+ * - Info strip
+ * - WhatsApp FAB
+ *
+ * SSR: fetch produk terbaru dari Product Service.
+ */
+import CustomerLayout from '../layouts/CustomerLayout.astro';
+import ProductCard from '../components/customer/ProductCard.astro';
+
+const PRODUCT_URL = import.meta.env.PUBLIC_PRODUCT_SERVICE_URL || 'http://localhost:3002';
+
+// Fetch 4 produk ready stock sebagai featured products
+let featuredProducts: any[] = [];
+try {
+  const res = await fetch(`${PRODUCT_URL}/products?limit=4&status=ready`);
+  if (res.ok) {
+    const json = await res.json();
+    featuredProducts = json.data || [];
+  }
+} catch {}
+
+// WhatsApp configuration
+const WA_NUMBER = '6281234567890';
+const WA_MESSAGE = encodeURIComponent('Halo Jalaku! Saya ingin memesan produk.');
+const waLink = `https://wa.me/${WA_NUMBER}?text=${WA_MESSAGE}`;
+
+// Hero images for carousel
+const heroImages = [
+  { src: '/images/hero/hero-1.png', alt: 'Hasil kebun segar dari petani keluarga' },
+  { src: '/images/hero/hero-2.png', alt: 'Sawah padi hijau di pagi hari' },
+  { src: '/images/hero/hero-3.png', alt: 'Kopi dan buah segar Nusantara' },
+];
+
+// Static testimonials
+const testimonials = [
+  {
+    name: 'Ibu Ratna',
+    location: 'Jakarta Selatan',
+    stars: 5,
+    text: '"Berasnya wangi sekali, beda dengan yang beli di pasar swalayan. Langsung kerasa kalau ini baru dipanen."',
+    initial: 'R',
+  },
+  {
+    name: 'Pak Budi',
+    location: 'Tangerang',
+    stars: 5,
+    text: '"Kopinya mantap, packaging-nya juga aman. Senang bisa bantu petani lokal secara langsung."',
+    initial: 'B',
+  },
+  {
+    name: 'Mba Siska',
+    location: 'Bandung',
+    stars: 4.5,
+    text: '"Sayurnya segar-segar banget, pas sampai masih ada embunnya. Recommended banget buat stok mingguan."',
+    initial: 'S',
+  },
+];
+
+// Product categories
+const categories = [
+  { icon: 'grass', label: 'Beras', href: '/produk?kategori=beras' },
+  { icon: 'coffee_maker', label: 'Kopi', href: '/produk?kategori=kopi' },
+  { icon: 'nutrition', label: 'Buah & Sayur', href: '/produk?kategori=alpukat' },
+  { icon: 'soup_kitchen', label: 'Olahan Dapur', href: '/produk?kategori=olahan_dapur' },
+];
+---
+
+<CustomerLayout title="Langsung dari Kebun Keluarga, ke Meja Makanmu">
+
+  <!-- ===== 1. HERO SECTION ===== -->
+  <section class="max-w-7xl mx-auto px-6 lg:px-8 pt-28 pb-16 md:pt-32 md:pb-24 flex flex-col md:flex-row items-center gap-12 lg:gap-16">
+    <!-- Left: Text Content -->
+    <div class="flex-1 space-y-8 animate-fade-up">
+      <div class="space-y-4">
+        <span class="text-amber-accent font-bold tracking-wider text-sm uppercase">
+          Pilihan Terbaik Nusantara
+        </span>
+        <h1 class="font-heading text-5xl md:text-6xl lg:text-7xl text-primary leading-[1.1] font-bold">
+          Dari Kebun Keluarga,<br />
+          <span class="text-sage italic">ke Meja Makanmu.</span>
+        </h1>
+      </div>
+
+      <p class="text-lg text-on-surface/70 max-w-lg leading-relaxed">
+        Nikmati kesegaran hasil bumi asli Indonesia, dipanen dengan penuh cinta oleh keluarga petani lokal, dan diantar langsung ke rumah Anda.
+      </p>
+
+      <div class="flex flex-wrap gap-4 pt-2">
+        <a
+          href="/produk"
+          class="bg-primary text-white font-bold px-8 py-4 rounded-xl hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 text-lg inline-flex items-center gap-2"
+        >
+          <span class="material-symbols-outlined text-xl">storefront</span>
+          Lihat Katalog
+        </a>
+        <a
+          href={waLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="border-2 border-sage text-primary font-bold px-8 py-4 rounded-xl hover:bg-sage/10 transition-all text-lg inline-flex items-center gap-2"
+        >
+          <span class="material-symbols-outlined text-xl">chat</span>
+          Cara Order
+        </a>
+      </div>
+    </div>
+
+    <!-- Right: Hero Image Carousel -->
+    <div class="flex-1 w-full animate-fade-up hidden md:block" style="animation-delay: 200ms;">
+      <div id="hero-carousel" class="rounded-[2rem] overflow-hidden aspect-[4/3] shadow-2xl relative border-8 border-white">
+        <!-- Overlay gradient -->
+        <div class="absolute inset-0 bg-gradient-to-tr from-primary/20 to-transparent z-10 mix-blend-overlay pointer-events-none"></div>
+
+        {heroImages.map((img, idx) => (
+          <img
+            src={img.src}
+            alt={img.alt}
+            class:list={[
+              'hero-slide absolute inset-0 w-full h-full object-cover transition-opacity duration-1000',
+              idx === 0 ? 'opacity-100' : 'opacity-0'
+            ]}
+            data-slide-index={idx}
+          />
+        ))}
+
+        <!-- Slide indicators -->
+        <div class="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex gap-2">
+          {heroImages.map((_, idx) => (
+            <button
+              class:list={[
+                'hero-dot w-2.5 h-2.5 rounded-full transition-all duration-300',
+                idx === 0 ? 'bg-white w-8' : 'bg-white/50'
+              ]}
+              data-dot-index={idx}
+              aria-label={`Slide ${idx + 1}`}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 2. VALUE PILLARS ===== -->
+  <section class="bg-beige-bg py-16 lg:py-20">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+
+        <div class="bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow flex flex-col items-center text-center space-y-4 group">
+          <div class="w-16 h-16 bg-sage/20 rounded-full flex items-center justify-center text-primary mb-2 group-hover:bg-sage/30 transition-colors">
+            <span class="material-symbols-outlined text-3xl">eco</span>
+          </div>
+          <h3 class="font-heading text-xl text-primary font-bold">Langsung dari Kebun</h3>
+          <p class="text-on-surface/70 leading-relaxed">Produk segar yang baru dipanen untuk menjamin kualitas terbaik sampai ke tangan Anda.</p>
+        </div>
+
+        <div class="bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow flex flex-col items-center text-center space-y-4 group">
+          <div class="w-16 h-16 bg-sage/20 rounded-full flex items-center justify-center text-primary mb-2 group-hover:bg-sage/30 transition-colors">
+            <span class="material-symbols-outlined text-3xl">payments</span>
+          </div>
+          <h3 class="font-heading text-xl text-primary font-bold">Harga Langsung Petani</h3>
+          <p class="text-on-surface/70 leading-relaxed">Tanpa perantara, harga lebih adil untuk Anda dan petani kami.</p>
+        </div>
+
+        <div class="bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow flex flex-col items-center text-center space-y-4 group">
+          <div class="w-16 h-16 bg-sage/20 rounded-full flex items-center justify-center text-primary mb-2 group-hover:bg-sage/30 transition-colors">
+            <span class="material-symbols-outlined text-3xl">family_restroom</span>
+          </div>
+          <h3 class="font-heading text-xl text-primary font-bold">Dikelola Keluarga Kami</h3>
+          <p class="text-on-surface/70 leading-relaxed">Setiap produk ditangani dengan nilai kekeluargaan dan kejujuran.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 3. PRODUCT CATEGORIES ===== -->
+  <section class="py-16 lg:py-20 max-w-7xl mx-auto px-6 lg:px-8">
+    <h2 class="font-heading text-3xl text-primary mb-10 text-center font-bold">Kategori Pilihan</h2>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+      {categories.map(cat => (
+        <a
+          href={cat.href}
+          class="bg-white p-8 rounded-2xl shadow-sm border border-sage/20 text-center hover:-translate-y-1 hover:shadow-md transition-all cursor-pointer group flex flex-col items-center relative overflow-hidden"
+        >
+          <div class="absolute top-0 inset-x-0 h-1 bg-sage/50 group-hover:bg-sage transition-colors"></div>
+          <div class="w-16 h-16 bg-sage/10 rounded-full flex items-center justify-center mb-4 group-hover:bg-sage/20 transition-colors">
+            <span class="material-symbols-outlined text-3xl text-primary">{cat.icon}</span>
+          </div>
+          <p class="font-bold text-primary text-lg">{cat.label}</p>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <!-- ===== 4. FEATURED PRODUCTS (from API) ===== -->
+  <section class="py-16 lg:py-20 bg-surface">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8">
+      <div class="flex justify-between items-end mb-10 border-b border-sage/20 pb-4">
+        <h2 class="font-heading text-3xl text-primary font-bold">Produk Unggulan</h2>
+        <a
+          href="/produk"
+          class="text-primary font-bold hover:text-primary/80 transition-colors flex items-center gap-1 text-sm"
+        >
+          Lihat Semua
+          <span class="material-symbols-outlined text-sm">arrow_forward</span>
+        </a>
+      </div>
+
+      {featuredProducts.length > 0 ? (
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {featuredProducts.map((product: any) => (
+            <ProductCard {...product} />
+          ))}
+        </div>
+      ) : (
+        <div class="text-center py-16">
+          <span class="material-symbols-outlined text-6xl text-sage/40 mb-4">inventory_2</span>
+          <p class="text-on-surface/50 text-lg">Produk sedang dimuat...</p>
+          <p class="text-on-surface/40 text-sm mt-2">Silakan cek kembali nanti atau lihat katalog lengkap.</p>
+          <a href="/produk" class="inline-flex items-center gap-2 mt-4 text-primary font-bold hover:text-primary/80 transition-colors">
+            Lihat Katalog
+            <span class="material-symbols-outlined text-sm">arrow_forward</span>
+          </a>
+        </div>
+      )}
+    </div>
+  </section>
+
+  <!-- ===== 5. TESTIMONIALS ===== -->
+  <section class="bg-beige-bg py-16 lg:py-24">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8">
+      <h2 class="font-heading text-3xl md:text-4xl text-primary text-center mb-12 font-bold">
+        Apa Kata Keluarga Jalaku
+      </h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+        {testimonials.map(t => (
+          <div class="bg-white p-8 rounded-3xl shadow-sm hover:shadow-md transition-shadow flex flex-col h-full border border-sage/10 relative">
+            <!-- Quote icon -->
+            <span class="material-symbols-outlined text-sage/20 absolute top-8 right-8 text-6xl rotate-180 pointer-events-none">format_quote</span>
+
+            <!-- Stars -->
+            <div class="flex gap-1 mb-6">
+              {Array.from({ length: Math.floor(t.stars) }).map(() => (
+                <span class="material-symbols-outlined text-amber-accent fill text-lg">star</span>
+              ))}
+              {t.stars % 1 !== 0 && (
+                <span class="material-symbols-outlined text-amber-accent fill text-lg">star_half</span>
+              )}
+            </div>
+
+            <!-- Quote text -->
+            <p class="italic text-on-surface/80 leading-relaxed text-lg flex-1 z-10 relative">
+              {t.text}
+            </p>
+
+            <!-- Author -->
+            <div class="flex items-center gap-4 pt-8 mt-auto border-t border-sage/10 z-10 relative">
+              <div class="w-14 h-14 rounded-full bg-gradient-to-br from-sage/40 to-primary/20 flex items-center justify-center ring-4 ring-white shadow-sm">
+                <span class="font-heading text-xl font-bold text-primary">{t.initial}</span>
+              </div>
+              <div>
+                <p class="font-bold text-primary text-lg">{t.name}</p>
+                <p class="text-sm text-on-surface/50 flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[14px]">location_on</span>
+                  {t.location}
+                </p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 6. HOW TO ORDER ===== -->
+  <section class="py-16 lg:py-24 max-w-7xl mx-auto px-6 lg:px-8">
+    <div class="text-center mb-16">
+      <h2 class="font-heading text-3xl md:text-4xl text-primary font-bold mb-4">Cara Pemesanan</h2>
+      <p class="text-on-surface/70 max-w-2xl mx-auto">
+        Tiga langkah mudah untuk menikmati hasil bumi segar langsung dari petani ke meja makan Anda.
+      </p>
+    </div>
+
+    <div class="flex flex-col md:flex-row justify-between items-start gap-8 lg:gap-12 relative">
+      <!-- Connecting Line for Desktop -->
+      <div class="hidden md:block absolute top-[44px] left-[15%] right-[15%] h-[2px] bg-gradient-to-r from-sage/20 via-sage to-sage/20 z-0"></div>
+
+      <!-- Step 1 -->
+      <div class="flex flex-col items-center text-center flex-1 space-y-6 relative z-10 w-full group">
+        <div class="w-24 h-24 bg-white border-4 border-sage rounded-full flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-300 relative">
+          <span class="font-heading text-4xl text-primary font-bold">1</span>
+          <div class="absolute -bottom-3 -right-3 bg-amber-accent w-10 h-10 rounded-full flex items-center justify-center text-white border-2 border-white shadow-sm">
+            <span class="material-symbols-outlined text-xl">shopping_cart</span>
+          </div>
+        </div>
+        <div>
+          <h3 class="font-heading text-xl text-primary font-bold mb-2">Pilih Produk</h3>
+          <p class="text-on-surface/70 leading-relaxed px-4">Jelajahi katalog kami dan temukan produk segar favorit Anda.</p>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="flex flex-col items-center text-center flex-1 space-y-6 relative z-10 w-full group">
+        <div class="w-24 h-24 bg-white border-4 border-sage rounded-full flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-300 relative">
+          <span class="font-heading text-4xl text-primary font-bold">2</span>
+          <div class="absolute -bottom-3 -right-3 bg-amber-accent w-10 h-10 rounded-full flex items-center justify-center text-white border-2 border-white shadow-sm">
+            <span class="material-symbols-outlined text-xl">chat</span>
+          </div>
+        </div>
+        <div>
+          <h3 class="font-heading text-xl text-primary font-bold mb-2">Hubungi via WA</h3>
+          <p class="text-on-surface/70 leading-relaxed px-4">Konfirmasi pesanan dengan admin kami melalui WhatsApp.</p>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="flex flex-col items-center text-center flex-1 space-y-6 relative z-10 w-full group">
+        <div class="w-24 h-24 bg-primary text-white border-4 border-primary rounded-full flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-300 relative">
+          <span class="font-heading text-4xl font-bold">3</span>
+          <div class="absolute -bottom-3 -right-3 bg-amber-accent w-10 h-10 rounded-full flex items-center justify-center text-white border-2 border-white shadow-sm">
+            <span class="material-symbols-outlined text-xl">home</span>
+          </div>
+        </div>
+        <div>
+          <h3 class="font-heading text-xl text-primary font-bold mb-2">Terima di Rumah</h3>
+          <p class="text-on-surface/70 leading-relaxed px-4">Pesanan diantar langsung ke depan pintu rumah Anda.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 7. INFO STRIP ===== -->
+  <section class="max-w-7xl mx-auto px-6 lg:px-8 py-12 lg:py-16">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+      <div class="bg-white rounded-2xl p-6 flex items-center gap-4 shadow-md border border-sage/20 hover:border-sage/50 transition-colors">
+        <div class="w-16 h-16 bg-beige-bg rounded-full flex items-center justify-center text-primary shadow-sm border border-sage/10 shrink-0">
+          <span class="material-symbols-outlined text-3xl">local_shipping</span>
+        </div>
+        <div>
+          <p class="font-heading text-lg text-primary font-bold mb-1">Area Pengiriman</p>
+          <p class="text-sm text-on-surface/70">Jabodetabek &amp; Bandung</p>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl p-6 flex items-center gap-4 shadow-md border border-sage/20 hover:border-sage/50 transition-colors">
+        <div class="w-16 h-16 bg-beige-bg rounded-full flex items-center justify-center text-primary shadow-sm border border-sage/10 shrink-0">
+          <span class="material-symbols-outlined text-3xl">payments</span>
+        </div>
+        <div>
+          <p class="font-heading text-lg text-primary font-bold mb-1">Metode Bayar</p>
+          <p class="text-sm text-on-surface/70">Transfer Bank &amp; E-Wallet</p>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl p-6 flex items-center gap-4 shadow-md border border-sage/20 hover:border-sage/50 transition-colors">
+        <div class="w-16 h-16 bg-beige-bg rounded-full flex items-center justify-center text-primary shadow-sm border border-sage/10 shrink-0">
+          <span class="material-symbols-outlined text-3xl">schedule</span>
+        </div>
+        <div>
+          <p class="font-heading text-lg text-primary font-bold mb-1">Estimasi Tiba</p>
+          <p class="text-sm text-on-surface/70">1-2 Hari Kerja</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===== 8. WHATSAPP FAB ===== -->
+  <a
+    href={waLink}
+    target="_blank"
+    rel="noopener noreferrer"
+    id="whatsapp-fab"
+    class="fixed bottom-6 right-6 bg-[#25D366] text-white p-4 rounded-full shadow-2xl hover:scale-110 transition-transform z-50 flex items-center justify-center animate-pulse-wa"
+    aria-label="Hubungi via WhatsApp"
+  >
+    <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"></path>
+    </svg>
+  </a>
+
+</CustomerLayout>
+
+<!-- Hero Carousel Script -->
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const slides = document.querySelectorAll<HTMLImageElement>('.hero-slide');
+    const dots = document.querySelectorAll<HTMLButtonElement>('.hero-dot');
+
+    if (slides.length === 0) return;
+
+    let currentSlide = 0;
+    const INTERVAL = 5000; // 5 seconds per slide
+
+    function showSlide(index: number) {
+      slides.forEach((slide, i) => {
+        if (i === index) {
+          slide.classList.remove('opacity-0');
+          slide.classList.add('opacity-100');
+        } else {
+          slide.classList.remove('opacity-100');
+          slide.classList.add('opacity-0');
+        }
+      });
+
+      dots.forEach((dot, i) => {
+        if (i === index) {
+          dot.classList.remove('bg-white/50');
+          dot.classList.add('bg-white', 'w-8');
+        } else {
+          dot.classList.remove('bg-white', 'w-8');
+          dot.classList.add('bg-white/50');
+        }
+      });
+    }
+
+    function nextSlide() {
+      currentSlide = (currentSlide + 1) % slides.length;
+      showSlide(currentSlide);
+    }
+
+    // Auto rotate
+    let timer = setInterval(nextSlide, INTERVAL);
+
+    // Click on dots to navigate
+    dots.forEach((dot, i) => {
+      dot.addEventListener('click', () => {
+        currentSlide = i;
+        showSlide(currentSlide);
+        // Reset timer
+        clearInterval(timer);
+        timer = setInterval(nextSlide, INTERVAL);
+      });
+    });
+  });
+</script>
