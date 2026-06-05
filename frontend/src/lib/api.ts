@@ -78,6 +78,7 @@ class ApiClient {
 
   /**
    * Mengirim HTTP request ke microservice.
+   * Includes global 401 interceptor for expired token detection.
    */
   private async request<T>(
     method: string,
@@ -115,6 +116,16 @@ class ApiClient {
 
     try {
       const response = await fetch(url, config);
+
+      // ---- Global 401 Interceptor ----
+      // Catch expired/invalid JWT tokens and redirect to login.
+      // Uses a flag to prevent multiple concurrent redirects from
+      // parallel API calls all returning 401 simultaneously.
+      if (response.status === 401) {
+        this.handleUnauthorized();
+        throw new Error("Sesi login telah berakhir. Silakan login kembali.");
+      }
+
       const data: ApiResponse<T> = await response.json();
 
       if (!response.ok) {
@@ -131,6 +142,25 @@ class ApiClient {
         );
       }
       throw error;
+    }
+  }
+
+  /**
+   * Handle 401 Unauthorized — clear auth state and redirect to login.
+   * Debounced via flag so parallel 401s don't cause multiple redirects.
+   */
+  private _redirecting = false;
+  private handleUnauthorized(): void {
+    if (this._redirecting || typeof window === "undefined") return;
+    this._redirecting = true;
+
+    localStorage.removeItem("jalaku_token");
+    localStorage.removeItem("jalaku_user");
+
+    // Only redirect if we're on an admin page (avoid redirecting public pages)
+    if (window.location.pathname.startsWith("/admin") &&
+        !window.location.pathname.includes("/admin/login")) {
+      window.location.href = "/admin/login";
     }
   }
 

@@ -19,7 +19,17 @@ export async function getAllProducts(req: Request, res: Response) {
 
     let query = supabase
       .from("products")
-      .select("*", { count: "exact" }) // Ambil juga total data keseluruhan
+      .select(
+        `
+        *,
+        product_images (
+          id,
+          image_url,
+          display_order
+        )
+      `,
+        { count: "exact" },
+      ) // Ambil juga total data keseluruhan + gambar produk
       .order("created_at", { ascending: false })
       .range(from, to); // Terapkan pembatasan halaman
 
@@ -34,8 +44,18 @@ export async function getAllProducts(req: Request, res: Response) {
 
     if (error) throw error;
 
+    // Sort product_images by display_order for each product
+    const products = (data || []).map((product: any) => {
+      if (product.product_images && product.product_images.length > 0) {
+        product.product_images.sort(
+          (a: any, b: any) => a.display_order - b.display_order,
+        );
+      }
+      return product;
+    });
+
     res.json({
-      data,
+      data: products,
       meta: {
         total_items: count,
         current_page: pageNumber,

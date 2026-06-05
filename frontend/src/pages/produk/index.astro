@@ -5,6 +5,7 @@
  * SSR: fetch GET /products di frontmatter.
  * Filter kategori via query string (?kategori=beras).
  * Responsive grid: 1-col → 2-col → 3-col → 4-col.
+ * Pagination dengan numbered pages.
  */
 import CustomerLayout from '../../layouts/CustomerLayout.astro';
 import ProductCard from '../../components/customer/ProductCard.astro';
@@ -39,106 +40,260 @@ try {
 }
 
 const KATEGORI_OPTIONS = [
-  { value: '', label: 'Semua' },
-  { value: 'gabah', label: 'Gabah' },
-  { value: 'beras', label: 'Beras' },
-  { value: 'kopi', label: 'Kopi' },
-  { value: 'alpukat', label: 'Alpukat' },
-  { value: 'jagung', label: 'Jagung' },
-  { value: 'olahan_dapur', label: 'Olahan Dapur' },
+  { value: '', label: 'Semua', icon: 'apps' },
+  { value: 'gabah', label: 'Gabah', icon: 'grass' },
+  { value: 'beras', label: 'Beras', icon: 'grass' },
+  { value: 'kopi', label: 'Kopi', icon: 'coffee_maker' },
+  { value: 'alpukat', label: 'Alpukat', icon: 'nutrition' },
+  { value: 'jagung', label: 'Jagung', icon: 'nutrition' },
+  { value: 'olahan_dapur', label: 'Olahan Dapur', icon: 'soup_kitchen' },
 ];
+
+// Build pagination page numbers
+function buildPageNumbers(current: number, total: number): (number | '...')[] {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+
+  const pages: (number | '...')[] = [];
+  pages.push(1);
+
+  if (current > 3) pages.push('...');
+
+  const start = Math.max(2, current - 1);
+  const end = Math.min(total - 1, current + 1);
+  for (let i = start; i <= end; i++) pages.push(i);
+
+  if (current < total - 2) pages.push('...');
+
+  pages.push(total);
+  return pages;
+}
+
+const pageNumbers = buildPageNumbers(meta.current_page, meta.total_pages);
+
+function buildPageUrl(p: number): string {
+  const params = new URLSearchParams();
+  params.set('page', String(p));
+  if (kategori) params.set('kategori', kategori);
+  return `/produk?${params.toString()}`;
+}
+
+const activeKategoriLabel = KATEGORI_OPTIONS.find(o => o.value === kategori)?.label || 'Semua';
 ---
 
 <CustomerLayout title="Katalog Produk" activeMenu="katalog">
 
-  <!-- Hero Banner -->
-  <section class="relative overflow-hidden bg-gradient-to-br from-primary-dark via-primary to-primary-light">
-    <div class="absolute inset-0 opacity-10">
-      <svg class="w-full h-full" viewBox="0 0 400 200" fill="none">
-        <circle cx="350" cy="30" r="120" fill="white" opacity="0.1" />
-        <circle cx="50" cy="180" r="80" fill="white" opacity="0.05" />
+  <!-- ===== HERO BANNER ===== -->
+  <section class="relative overflow-hidden bg-primary mt-0">
+    <!-- Background pattern -->
+    <div class="absolute inset-0">
+      <div class="absolute inset-0 bg-gradient-to-br from-primary-dark via-primary to-primary-light"></div>
+      <!-- Decorative circles -->
+      <div class="absolute -top-20 -right-20 w-80 h-80 rounded-full bg-sage/10 blur-3xl"></div>
+      <div class="absolute -bottom-32 -left-16 w-64 h-64 rounded-full bg-amber-accent/10 blur-3xl"></div>
+      <!-- Leaf pattern -->
+      <svg class="absolute top-6 right-10 w-28 h-28 text-white/5 animate-float" fill="currentColor" viewBox="0 0 100 100">
+        <path d="M50 10c-5 20-25 30-40 35 15 5 35 15 40 35 5-20 25-30 40-35-15-5-35-15-40-35z" />
+      </svg>
+      <svg class="absolute bottom-8 left-16 w-16 h-16 text-white/5 animate-float-delayed" fill="currentColor" viewBox="0 0 100 100">
+        <path d="M50 10c-5 20-25 30-40 35 15 5 35 15 40 35 5-20 25-30 40-35-15-5-35-15-40-35z" />
       </svg>
     </div>
-    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-      <h1 class="text-3xl sm:text-4xl font-bold text-white tracking-tight" style="font-family: Outfit, sans-serif;">
-        Katalog Produk 🌾
-      </h1>
-      <p class="text-sm sm:text-base text-white/70 mt-2 max-w-lg">
-        Pilihan hasil tani, kebun, dan olahan dapur segar langsung dari desa kami.
-      </p>
+
+    <div class="relative max-w-7xl mx-auto px-6 lg:px-8 py-14 sm:py-20">
+      <div class="max-w-2xl">
+        <!-- Breadcrumb -->
+        <nav class="flex items-center gap-2 text-sm text-white/50 mb-4">
+          <a href="/" class="hover:text-white/80 transition-colors">Beranda</a>
+          <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+          <span class="text-white/80">Katalog</span>
+          {kategori && (
+            <>
+              <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+              <span class="text-sage">{activeKategoriLabel}</span>
+            </>
+          )}
+        </nav>
+
+        <h1 class="font-heading text-4xl sm:text-5xl font-bold text-white leading-tight">
+          {kategori ? activeKategoriLabel : 'Katalog Produk'}
+        </h1>
+        <p class="text-base sm:text-lg text-white/60 mt-3 max-w-lg leading-relaxed">
+          Pilihan hasil tani, kebun, dan olahan dapur segar langsung dari keluarga petani kami ke meja makan Anda.
+        </p>
+
+        <!-- Stats -->
+        <div class="flex items-center gap-6 mt-6">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-sage text-xl">inventory_2</span>
+            <span class="text-white/70 text-sm">
+              <strong class="text-white">{meta.total_items}</strong> produk tersedia
+            </span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-sage text-xl">eco</span>
+            <span class="text-white/70 text-sm">100% dari petani lokal</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Wave divider -->
+    <div class="absolute bottom-0 left-0 right-0">
+      <svg viewBox="0 0 1440 50" fill="none" class="w-full" preserveAspectRatio="none">
+        <path d="M0 25C240 50 480 0 720 25C960 50 1200 0 1440 25V50H0V25Z" fill="#FAF9F5" />
+      </svg>
     </div>
   </section>
 
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="max-w-7xl mx-auto px-6 lg:px-8 py-8">
 
-    <!-- Filter Chips -->
-    <div class="flex flex-wrap gap-2 mb-8">
-      {KATEGORI_OPTIONS.map(opt => (
-        <a
-          href={opt.value ? `/produk?kategori=${opt.value}` : '/produk'}
-          class:list={[
-            'px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 border',
-            kategori === opt.value
-              ? 'bg-primary text-white border-primary shadow-md shadow-primary/20'
-              : 'bg-white text-text-light border-gray-200 hover:border-primary/30 hover:text-primary hover:bg-primary/5'
-          ]}
-        >
-          {opt.label}
-        </a>
-      ))}
+    <!-- ===== FILTER SECTION ===== -->
+    <div class="mb-10">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-sm font-semibold text-on-surface/50 uppercase tracking-wider flex items-center gap-2">
+          <span class="material-symbols-outlined text-[18px]">filter_list</span>
+          Filter Kategori
+        </h2>
+        {kategori && (
+          <a
+            href="/produk"
+            class="text-sm text-primary hover:text-primary/80 font-medium flex items-center gap-1 transition-colors"
+          >
+            <span class="material-symbols-outlined text-[16px]">close</span>
+            Reset Filter
+          </a>
+        )}
+      </div>
+
+      <div class="flex flex-wrap gap-2.5">
+        {KATEGORI_OPTIONS.map(opt => (
+          <a
+            href={opt.value ? `/produk?kategori=${opt.value}` : '/produk'}
+            class:list={[
+              'inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 border',
+              kategori === opt.value
+                ? 'bg-primary text-white border-primary shadow-md shadow-primary/20'
+                : 'bg-white text-on-surface/70 border-sage/20 hover:border-primary/30 hover:text-primary hover:bg-sage/5 hover:shadow-sm'
+            ]}
+          >
+            <span class:list={[
+              'material-symbols-outlined text-[18px]',
+              kategori === opt.value ? 'text-white/80' : 'text-sage'
+            ]}>
+              {opt.icon}
+            </span>
+            {opt.label}
+          </a>
+        ))}
+      </div>
     </div>
 
-    <!-- Product Grid -->
+    <!-- ===== RESULTS INFO ===== -->
+    {products.length > 0 && (
+      <div class="flex items-center justify-between mb-6">
+        <p class="text-sm text-on-surface/50">
+          Menampilkan <strong class="text-on-surface/80">{products.length}</strong> dari <strong class="text-on-surface/80">{meta.total_items}</strong> produk
+          {meta.total_pages > 1 && (
+            <span> · Halaman {meta.current_page} dari {meta.total_pages}</span>
+          )}
+        </p>
+      </div>
+    )}
+
+    <!-- ===== PRODUCT GRID ===== -->
     {products.length > 0 ? (
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {products.map((product: any) => (
           <ProductCard {...product} />
         ))}
       </div>
     ) : (
-      <div class="text-center py-20">
-        <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-        </svg>
-        <h3 class="text-lg font-bold text-text" style="font-family: Outfit, sans-serif;">
+      <div class="text-center py-24">
+        <div class="w-24 h-24 mx-auto bg-beige-bg rounded-full flex items-center justify-center mb-6">
+          <span class="material-symbols-outlined text-5xl text-sage/50">inventory_2</span>
+        </div>
+        <h3 class="font-heading text-xl text-primary font-bold mb-2">
           Produk belum tersedia
         </h3>
-        <p class="text-sm text-text-muted mt-1">
-          {kategori ? 'Tidak ada produk untuk kategori ini.' : 'Belum ada produk yang ditambahkan.'}
+        <p class="text-sm text-on-surface/50 max-w-sm mx-auto">
+          {kategori
+            ? `Tidak ada produk untuk kategori "${activeKategoriLabel}" saat ini. Coba lihat kategori lainnya.`
+            : 'Belum ada produk yang ditambahkan. Silakan cek kembali nanti.'}
         </p>
         {kategori && (
-          <a href="/produk" class="inline-flex items-center gap-1 mt-4 text-sm font-medium text-primary hover:underline">
-            ← Lihat semua produk
+          <a
+            href="/produk"
+            class="inline-flex items-center gap-2 mt-6 px-6 py-3 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-all shadow-sm"
+          >
+            <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+            Lihat Semua Produk
           </a>
         )}
       </div>
     )}
 
-    <!-- Pagination -->
+    <!-- ===== PAGINATION ===== -->
     {meta.total_pages > 1 && (
-      <div class="flex items-center justify-center gap-2 mt-10">
-        {page > 1 && (
+      <nav class="flex items-center justify-center gap-1.5 mt-12" aria-label="Navigasi halaman">
+        <!-- Previous -->
+        {page > 1 ? (
           <a
-            href={`/produk?page=${page - 1}${kategori ? `&kategori=${kategori}` : ''}`}
-            class="px-4 py-2 rounded-xl text-sm font-medium border border-gray-200 text-text-light hover:bg-gray-50 transition-colors"
+            href={buildPageUrl(page - 1)}
+            class="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-medium text-on-surface/70 bg-white border border-sage/20 hover:border-primary/30 hover:text-primary hover:shadow-sm transition-all"
+            aria-label="Halaman sebelumnya"
           >
-            ← Sebelumnya
+            <span class="material-symbols-outlined text-[18px]">chevron_left</span>
+            <span class="hidden sm:inline">Sebelumnya</span>
           </a>
+        ) : (
+          <span class="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-medium text-on-surface/30 bg-gray-50 border border-gray-100 cursor-not-allowed">
+            <span class="material-symbols-outlined text-[18px]">chevron_left</span>
+            <span class="hidden sm:inline">Sebelumnya</span>
+          </span>
         )}
 
-        <span class="px-4 py-2 text-sm text-text-muted">
-          Halaman {meta.current_page} dari {meta.total_pages}
-        </span>
+        <!-- Page Numbers -->
+        <div class="flex items-center gap-1">
+          {pageNumbers.map(p => (
+            p === '...' ? (
+              <span class="w-10 h-10 flex items-center justify-center text-sm text-on-surface/40">
+                ···
+              </span>
+            ) : (
+              <a
+                href={buildPageUrl(p as number)}
+                class:list={[
+                  'w-10 h-10 flex items-center justify-center rounded-xl text-sm font-medium transition-all duration-200',
+                  p === meta.current_page
+                    ? 'bg-primary text-white shadow-md shadow-primary/20'
+                    : 'text-on-surface/70 bg-white border border-sage/20 hover:border-primary/30 hover:text-primary hover:shadow-sm'
+                ]}
+                aria-label={`Halaman ${p}`}
+                aria-current={p === meta.current_page ? 'page' : undefined}
+              >
+                {p}
+              </a>
+            )
+          ))}
+        </div>
 
-        {page < meta.total_pages && (
+        <!-- Next -->
+        {page < meta.total_pages ? (
           <a
-            href={`/produk?page=${page + 1}${kategori ? `&kategori=${kategori}` : ''}`}
-            class="px-4 py-2 rounded-xl text-sm font-medium border border-gray-200 text-text-light hover:bg-gray-50 transition-colors"
+            href={buildPageUrl(page + 1)}
+            class="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-medium text-on-surface/70 bg-white border border-sage/20 hover:border-primary/30 hover:text-primary hover:shadow-sm transition-all"
+            aria-label="Halaman berikutnya"
           >
-            Berikutnya →
+            <span class="hidden sm:inline">Berikutnya</span>
+            <span class="material-symbols-outlined text-[18px]">chevron_right</span>
           </a>
+        ) : (
+          <span class="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-medium text-on-surface/30 bg-gray-50 border border-gray-100 cursor-not-allowed">
+            <span class="hidden sm:inline">Berikutnya</span>
+            <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+          </span>
         )}
-      </div>
+      </nav>
     )}
 
   </div>

@@ -3,9 +3,10 @@
  * Jalaku — Header Publik
  *
  * Navigasi utama untuk halaman customer-facing.
- * Sticky glassmorphism navbar dengan logo, navigasi, cart badge.
+ * Sticky glassmorphism navbar dengan logo, navigasi,
+ * dan NavbarActions (notification, cart, profile/login).
  */
-import CartBadge from '../common/CartBadge.tsx';
+import NavbarActions from '../common/NavbarActions.tsx';
 
 interface Props {
   activeMenu?: string;
@@ -30,7 +31,7 @@ const navItems = [
     <div class="flex items-center justify-between h-16 sm:h-[72px]">
 
       <!-- Logo -->
-      <a href="/" class="flex items-center gap-2.5 group">
+      <a href="/" class="flex items-center gap-2.5 group shrink-0">
         <span class="material-symbols-outlined fill text-sage text-3xl group-hover:scale-110 transition-transform">potted_plant</span>
         <span class="font-heading text-2xl font-bold text-primary tracking-tight">
           Jalaku
@@ -54,10 +55,9 @@ const navItems = [
         ))}
       </nav>
 
-      <!-- Right: Cart + Mobile Menu -->
-      <div class="flex items-center gap-2">
-        <!-- Cart Badge (React Island) -->
-        <CartBadge client:load />
+      <!-- Right: NavbarActions (React Island) + Mobile Menu -->
+      <div class="flex items-center gap-1">
+        <NavbarActions client:load />
 
         <!-- Mobile Hamburger -->
         <button
@@ -87,15 +87,38 @@ const navItems = [
         <a
           href={item.href}
           class:list={[
-            'flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-colors',
+            'flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors',
             activeMenu === item.id
               ? 'bg-primary/10 text-primary'
               : 'text-on-surface/70 hover:text-primary hover:bg-sage/10'
           ]}
         >
+          <span class="material-symbols-outlined text-[20px]">
+            {item.id === 'katalog' ? 'storefront' : 'local_shipping'}
+          </span>
           {item.label}
         </a>
       ))}
+
+      <!-- Mobile: Pesanan Saya -->
+      <a
+        href="/lacak"
+        class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-on-surface/70 hover:text-primary hover:bg-sage/10 transition-colors"
+      >
+        <span class="material-symbols-outlined text-[20px]">receipt_long</span>
+        Pesanan Saya
+      </a>
+
+      <!-- Mobile: Login/Register -->
+      <div class="pt-2 mt-2 border-t border-sage/10">
+        <a
+          href="/register"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-primary bg-primary/5 hover:bg-primary/10 transition-colors"
+        >
+          <span class="material-symbols-outlined text-[20px]">login</span>
+          Masuk / Daftar
+        </a>
+      </div>
     </nav>
   </div>
 </header>
